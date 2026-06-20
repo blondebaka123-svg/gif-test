@@ -12,8 +12,10 @@
             cursor: pointer; font-family: sans-serif; color: white;
         }
         #gif { display: none; width: 100%; height: 100%; object-fit: contain; }
-        #video-pozadi { display: none; }
         #text { font-size: 2.5rem; text-align: center; user-select: none; font-weight: bold; }
+        
+        /* Tímto bezpečně schováme YouTube video, aby nebylo vidět, ale stihlo se načíst */
+        #schovavac-videa { position: absolute; top: -9999px; left: -9999px; visibility: hidden; }
     </style>
 </head>
 <body>
@@ -22,22 +24,53 @@
     
     <img id="gif" src="https://media.tenor.com/cHt46rvRWlQAAAAd/veronika-kazakova-blood-debt.gif" alt="GIF">
 
-    <iframe id="video-pozadi" width="560" height="315" src="https://www.youtube.com/embed/4aBO4KN0SXQ?enablejsapi=1" frameborder="0" allow="autoplay"></iframe>
+    <div id="schovavac-videa">
+        <div id="video-pozadi"></div>
+    </div>
 
     <script>
         const body = document.body;
         const text = document.getElementById('text');
         const gif = document.getElementById('gif');
-        const iframe = document.getElementById('video-pozadi');
+        
+        let player;
+        let jePripraveno = false;
 
-        // Jakmile uživatel klikne kamkoliv na stránku:
+        // 1. Krok: Načtení vylepšeného YouTube API na pozadí
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        // 2. Krok: Vytvoření skrytého přehrávače hned při startu webu
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('video-pozadi', {
+                height: '10',
+                width: '10',
+                videoId: '4aBO4KN0SXQ', // Tvoje písnička
+                playerVars: {
+                    'playsinline': 1,
+                    'loop': 1,
+                    'playlist': '4aBO4KN0SXQ', // Tady musí být stejné ID kvůli opakování
+                    'controls': 0,
+                    'disablekb': 1
+                },
+                events: {
+                    'onReady': () => { jePripraveno = true; } // Zapamatuje si, že je píseň připravena
+                }
+            });
+        }
+
+        // 3. Krok: Okamžitá akce po kliknutí
         body.addEventListener('click', () => {
-            text.style.display = 'none'; // Schová se text
-            gif.style.display = 'block'; // Ukáže se GIF
+            text.style.display = 'none'; // Schová text
+            gif.style.display = 'block'; // Ukáže GIF
             
-            // Spustí se YouTube video na pozadí a zacyklí se
-            iframe.src += "&autoplay=1&loop=1&playlist=4aBO4KN0SXQ"; 
-        }, { once: true }); // { once: true } zajistí, že se to nespustí znovu, když někdo klikne víckrát
+            // Pokud je už video načtené, spustí se hned bez čekání
+            if (jePripraveno) {
+                player.playVideo();
+            }
+        }, { once: true });
     </script>
 
 </body>
