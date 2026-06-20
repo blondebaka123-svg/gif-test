@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klikni pro překvapení!</title>
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: black;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; font-family: sans-serif; color: white;
+        }
+        #gif { display: none; width: 100%; height: 100%; object-fit: contain; }
+        #video-pozadi { display: none; }
+        #text { font-size: 2.5rem; text-align: center; user-select: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="text">KLIKNI PRO PŘEKVAPENÍ! 🎵</div>
+    
+    <img id="gif" src="https://media.giphy.com/media/l3vQYm0yk87jOIsZq/giphy.gif" alt="GIF">
+
+    <iframe id="video-pozadi" width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1" frameborder="0" allow="autoplay"></iframe>
+
+    <script>
+        const body = document.body;
+        const text = document.getElementById('text');
+        const gif = document.getElementById('gif');
+        const iframe = document.getElementById('video-pozadi');
+
+        // Jakmile uživatel klikne kamkoliv na stránku:
+        body.addEventListener('click', () => {
+            text.style.display = 'none'; // Schová se text
+            gif.style.display = 'block'; // Ukáže se GIF
+            
+            // Spustí se YouTube video na pozadí a zacyklí se
+            iframe.src += "&autoplay=1&loop=1&playlist=dQw4w9WgXcQ"; 
+        });
+    </script>
+
+</body>
+</html>
