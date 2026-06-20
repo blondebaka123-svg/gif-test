@@ -22,7 +22,7 @@
     
     <img id="gif" src="https://media.tenor.com/cHt46rvRWlQAAAAd/veronika-kazakova-blood-debt.gif" alt="GIF">
 
-    <iframe id="video-pozadi" width="560" height="315" src="https://www.youtube.com/watch?v=4aBO4KN0SXQ" frameborder="0" allow="autoplay"></iframe>
+    <iframe id="video-pozadi" width="560" height="315" src="https://www.youtube.com/embed/4aBO4KN0SXQ?enablejsapi=1" frameborder="0" allow="autoplay"></iframe>
 
     <script>
         const body = document.body;
@@ -37,7 +37,7 @@
             
             // Spustí se YouTube video na pozadí a zacyklí se
             iframe.src += "&autoplay=1&loop=1&playlist=4aBO4KN0SXQ"; 
-        });
+        }, { once: true }); // { once: true } zajistí, že se to nespustí znovu, když někdo klikne víckrát
     </script>
 
 </body>
