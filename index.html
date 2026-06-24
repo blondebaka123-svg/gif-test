@@ -2,87 +2,222 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test zraku</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Útěk ze Tmy</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: white; /* Nevinné bílé pozadí na začátek */
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; font-family: sans-serif;
-            transition: background-color 0.1s;
+            background-color: #000; overflow: hidden;
+            font-family: 'Courier New', Courier, monospace; color: white;
+            /* Zabrání nechtěnému označování textu při hraní na mobilu */
+            user-select: none; -webkit-user-select: none;
         }
-        #gif { display: none; width: 100%; height: 100%; object-fit: cover; } /* Cover zaručí, že GIF vyplní celou obrazovku */
-        #text { font-size: 2rem; text-align: center; user-select: none; color: black; }
-        .red-dot { color: red; font-size: 4rem; display: block; margin-top: 20px; }
+        #gameCanvas { 
+            display: block; width: 100%; height: 100%; 
+            image-rendering: pixelated; /* Dělá tu správnou ostrou 8-bit grafiku */
+        }
+        #ui { 
+            position: absolute; top: 15px; left: 15px; 
+            font-size: 24px; font-weight: bold; pointer-events: none; z-index: 10; 
+        }
+        #message { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            font-size: 40px; text-align: center; color: red; display: none; 
+            z-index: 10; font-weight: bold; text-shadow: 3px 3px 0 #000; 
+        }
         
-        /* Skrytí videa */
-        #schovavac-videa { position: absolute; top: -9999px; left: -9999px; visibility: hidden; }
-        
-        /* Třída, která se přidá po kliknutí (zčerná pozadí) */
-        body.scary { background-color: black; }
+        /* Tlačítka pro mobilní telefony */
+        #mobile-controls {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: grid; grid-template-columns: 70px 70px 70px; grid-template-rows: 70px 70px; gap: 15px;
+            z-index: 20;
+        }
+        .btn {
+            background: rgba(255, 255, 255, 0.15); border: 2px solid #444; color: white;
+            font-size: 30px; border-radius: 12px; display: flex; justify-content: center; align-items: center;
+        }
+        .btn:active { background: rgba(255, 0, 0, 0.5); }
+        #btn-up { grid-column: 2; grid-row: 1; }
+        #btn-left { grid-column: 1; grid-row: 2; }
+        #btn-down { grid-column: 2; grid-row: 2; }
+        #btn-right { grid-column: 3; grid-row: 2; }
+
+        /* Skryje dotykové ovládání, pokud je člověk na počítači */
+        @media (min-width: 768px) { #mobile-controls { display: none; } }
     </style>
 </head>
 <body>
 
-    <!-- Návnada, aby se člověk soustředil -->
-    <div id="text">
-        Soustřeď se na červenou tečku<br>
-        <span class="red-dot">●</span><br>
-        <span style="font-size: 1rem; color: gray;">(Klikni pro zaostření obrazu)</span>
-    </div>
-    
-    <!-- Děsivý animatronický FNAF jumpscare -->
-    <img id="gif" src="https://media.tenor.com/812B2E9QZ_wAAAAC/fnaf-jumpscare.gif" alt="Scary">
+    <div id="ui">Duše: <span id="score">0</span>/5</div>
+    <div id="message"></div>
+    <canvas id="gameCanvas"></canvas>
 
-    <div id="schovavac-videa">
-        <div id="video-pozadi"></div>
+    <div id="mobile-controls">
+        <div class="btn" id="btn-up">⬆️</div>
+        <div class="btn" id="btn-left">⬅️</div>
+        <div class="btn" id="btn-down">⬇️</div>
+        <div class="btn" id="btn-right">➡️</div>
     </div>
 
     <script>
-        const body = document.body;
-        const text = document.getElementById('text');
-        const gif = document.getElementById('gif');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const messageEl = document.getElementById('message');
+
+        // Nastavení plátna přes celou obrazovku
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Proměnné hry
+        const player = { x: canvas.width/2, y: canvas.height/2, size: 12, speed: 4, color: '#fff' };
+        const monster = { x: -100, y: -100, size: 16, speed: 1.8, color: '#900' };
+        let item = { x: 0, y: 0, size: 8, color: '#ff0' };
         
-        let player;
-        let jePripraveno = false;
+        let score = 0;
+        let gameOver = false;
+        let keys = {}; // Drží stisknuté klávesy
 
-        // Načtení YouTube iframe API
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('video-pozadi', {
-                height: '10',
-                width: '10',
-                videoId: 'aH7N_W8oMpo', // Extrémně hlasitý FNAF křik
-                playerVars: {
-                    'playsinline': 1,
-                    'controls': 0,
-                    'disablekb': 1
-                },
-                events: {
-                    'onReady': (event) => { 
-                        jePripraveno = true; 
-                        event.target.setVolume(100); // Napálí hlasitost na YouTube přehrávači na maximum
-                    }
-                }
-            });
+        // Umístí novou duši náhodně na mapu
+        function spawnItem() {
+            item.x = Math.random() * (canvas.width - 60) + 30;
+            item.y = Math.random() * (canvas.height - 60) + 30;
         }
 
-        body.addEventListener('click', () => {
-            text.style.display = 'none'; // Schová nevinný text
-            gif.style.display = 'block'; // Ukáže děsivý GIF na celou obrazovku
-            body.classList.add('scary'); // Pozadí okamžitě zčerná
-            
-            if (jePripraveno) {
-                player.seekTo(0); 
-                player.playVideo(); // Vypálí zvuk
-            }
-        }, { once: true });
-    </script>
+        // --- OVLÁDÁNÍ PC ---
+        window.addEventListener('keydown', e => { keys[e.key] = true; });
+        window.addEventListener('keyup', e => { keys[e.key] = false; });
 
+        // --- OVLÁDÁNÍ MOBIL ---
+        const bindBtn = (id, key) => {
+            const btn = document.getElementById(id);
+            // preventDefault zabrání rolování obrazovky při mačkání tlačítek
+            btn.addEventListener('touchstart', e => { e.preventDefault(); keys[key] = true; }, {passive: false});
+            btn.addEventListener('touchend', e => { e.preventDefault(); keys[key] = false; }, {passive: false});
+        };
+        bindBtn('btn-up', 'ArrowUp'); bindBtn('btn-down', 'ArrowDown');
+        bindBtn('btn-left', 'ArrowLeft'); bindBtn('btn-right', 'ArrowRight');
+
+        function update() {
+            if (gameOver) return;
+
+            // Hráčův pohyb (reaguje na PC i Mobil)
+            if (keys['ArrowUp'] || keys['w'] || keys['W']) player.y -= player.speed;
+            if (keys['ArrowDown'] || keys['s'] || keys['S']) player.y += player.speed;
+            if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.x -= player.speed;
+            if (keys['ArrowRight'] || keys['d'] || keys['D']) player.x += player.speed;
+
+            // Zastavení hráče o okraje obrazovky
+            player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
+            player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
+
+            // Umělá inteligence Monstra (letí za hráčem)
+            let dx = player.x - monster.x;
+            let dy = player.y - monster.y;
+            let distToMonster = Math.sqrt(dx*dx + dy*dy);
+            if (distToMonster > 0) {
+                monster.x += (dx / distToMonster) * monster.speed;
+                monster.y += (dy / distToMonster) * monster.speed;
+            }
+
+            // Sebrání duše
+            let ix = player.x - item.x;
+            let iy = player.y - item.y;
+            if (Math.sqrt(ix*ix + iy*iy) < player.size + item.size) {
+                score++;
+                scoreEl.innerText = score;
+                monster.speed += 0.45; // Monstrum zrychlí
+                
+                if (score >= 5) winGame();
+                else spawnItem();
+            }
+
+            // Monstrum chytilo hráče
+            if (distToMonster < player.size + monster.size) {
+                loseGame();
+            }
+        }
+
+        function draw() {
+            // Černé pozadí
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (gameOver) return;
+
+            // Nakresli Duši (žlutá)
+            ctx.fillStyle = item.color;
+            ctx.fillRect(item.x - item.size, item.y - item.size, item.size*2, item.size*2);
+
+            // Nakresli Monstrum (krvavá červená)
+            ctx.fillStyle = monster.color;
+            ctx.fillRect(monster.x - monster.size, monster.y - monster.size, monster.size*2, monster.size*2);
+
+            // Nakresli Hráče (bílá)
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x - player.size, player.y - player.size, player.size*2, player.size*2);
+
+            // --- HOROROVÝ EFEKT BATERKY ---
+            // Vytvoří tmu kolem hráče, vidí jen kousek
+            let gradient = ctx.createRadialGradient(player.x, player.y, 40, player.x, player.y, 160);
+            gradient.addColorStop(0, 'rgba(0,0,0,0)');       // Průhledný střed
+            gradient.addColorStop(1, 'rgba(0,0,0,0.98)');    // Neprůhledná tma na okrajích
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Hlavní smyčka hry
+        function loop() {
+            update();
+            draw();
+            if (!gameOver) requestAnimationFrame(loop);
+        }
+
+        // --- ZVUK A JUMPSCARE PŘI PROHŘE ---
+        function loseGame() {
+            gameOver = true;
+            ctx.fillStyle = '#600000'; // Obrazovka zrudne krví
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Generování strašidelného zvuku čistě přes kód (bez nutnosti MP3)
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sawtooth'; // Ostrý, nepříjemný zvuk
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 1.5);
+                osc.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.5);
+            } catch(e) { console.log("Zvuk není podporován"); }
+
+            messageEl.innerHTML = "NAŠLO TĚ TO.<br><br><span style='font-size:20px; cursor:pointer; color: white; text-decoration: underline;' onclick='location.reload()'>Zkusit znovu</span>";
+            messageEl.style.display = 'block';
+            document.getElementById('mobile-controls').style.display = 'none'; // Schová tlačítka
+        }
+
+        function winGame() {
+            gameOver = true;
+            ctx.fillStyle = '#002200'; // Temně zelená pro výhru
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            messageEl.style.color = '#0f0';
+            messageEl.innerHTML = "PŘEŽIL JSI!<br><br><span style='font-size:20px; cursor:pointer; color: white; text-decoration: underline;' onclick='location.reload()'>Hrát znovu</span>";
+            messageEl.style.display = 'block';
+            document.getElementById('mobile-controls').style.display = 'none';
+        }
+
+        // Spuštění hry
+        spawnItem();
+        // Monstrum se spawne schválně mimo obrazovku, aby dal hráči 1 vteřinu náskok
+        monster.x = Math.random() < 0.5 ? -100 : canvas.width + 100; 
+        monster.y = Math.random() < 0.5 ? -100 : canvas.height + 100;
+        loop();
+    </script>
 </body>
 </html>
+
