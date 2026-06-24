@@ -3,26 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klikni pro překvapení!</title>
+    <title>Test zraku</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: black;
+            overflow: hidden; background-color: white; /* Nevinné bílé pozadí na začátek */
             display: flex; justify-content: center; align-items: center;
-            cursor: pointer; font-family: sans-serif; color: white;
+            cursor: pointer; font-family: sans-serif;
+            transition: background-color 0.1s;
         }
-        #gif { display: none; width: 100%; height: 100%; object-fit: contain; }
-        #text { font-size: 2.5rem; text-align: center; user-select: none; font-weight: bold; }
+        #gif { display: none; width: 100%; height: 100%; object-fit: cover; } /* Cover zaručí, že GIF vyplní celou obrazovku */
+        #text { font-size: 2rem; text-align: center; user-select: none; color: black; }
+        .red-dot { color: red; font-size: 4rem; display: block; margin-top: 20px; }
         
-        /* Tímto bezpečně schováme YouTube video, aby nebylo vidět, ale stihlo se načíst */
+        /* Skrytí videa */
         #schovavac-videa { position: absolute; top: -9999px; left: -9999px; visibility: hidden; }
+        
+        /* Třída, která se přidá po kliknutí (zčerná pozadí) */
+        body.scary { background-color: black; }
     </style>
 </head>
 <body>
 
-    <div id="text">KLIKNI PRO PŘEKVAPENÍ! </div>
+    <!-- Návnada, aby se člověk soustředil -->
+    <div id="text">
+        Soustřeď se na červenou tečku<br>
+        <span class="red-dot">●</span><br>
+        <span style="font-size: 1rem; color: gray;">(Klikni pro zaostření obrazu)</span>
+    </div>
     
-    <img id="gif" src="https://media.tenor.com/cHt46rvRWlQAAAAd/veronika-kazakova-blood-debt.gif" alt="GIF">
+    <!-- Děsivý animatronický FNAF jumpscare -->
+    <img id="gif" src="https://media.tenor.com/812B2E9QZ_wAAAAC/fnaf-jumpscare.gif" alt="Scary">
 
     <div id="schovavac-videa">
         <div id="video-pozadi"></div>
@@ -36,39 +47,39 @@
         let player;
         let jePripraveno = false;
 
-        // 1. Krok: Načtení vylepšeného YouTube API na pozadí
+        // Načtení YouTube iframe API
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         const firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        // 2. Krok: Vytvoření skrytého přehrávače hned při startu webu
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('video-pozadi', {
                 height: '10',
                 width: '10',
-                videoId: '4aBO4KN0SXQ', // Tvoje písnička
+                videoId: 'aH7N_W8oMpo', // Extrémně hlasitý FNAF křik
                 playerVars: {
                     'playsinline': 1,
-                    'loop': 1,
-                    'playlist': '4aBO4KN0SXQ', // Tady musí být stejné ID kvůli opakování
                     'controls': 0,
                     'disablekb': 1
                 },
                 events: {
-                    'onReady': () => { jePripraveno = true; } // Zapamatuje si, že je píseň připravena
+                    'onReady': (event) => { 
+                        jePripraveno = true; 
+                        event.target.setVolume(100); // Napálí hlasitost na YouTube přehrávači na maximum
+                    }
                 }
             });
         }
 
-        // 3. Krok: Okamžitá akce po kliknutí
         body.addEventListener('click', () => {
-            text.style.display = 'none'; // Schová text
-            gif.style.display = 'block'; // Ukáže GIF
+            text.style.display = 'none'; // Schová nevinný text
+            gif.style.display = 'block'; // Ukáže děsivý GIF na celou obrazovku
+            body.classList.add('scary'); // Pozadí okamžitě zčerná
             
-            // Pokud je už video načtené, spustí se hned bez čekání
             if (jePripraveno) {
-                player.playVideo();
+                player.seekTo(0); 
+                player.playVideo(); // Vypálí zvuk
             }
         }, { once: true });
     </script>
