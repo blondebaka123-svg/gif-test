@@ -1,223 +1,637 @@
+
+
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Útěk ze Tmy</title>
-    <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #000; overflow: hidden;
-            font-family: 'Courier New', Courier, monospace; color: white;
-            /* Zabrání nechtěnému označování textu při hraní na mobilu */
-            user-select: none; -webkit-user-select: none;
-        }
-        #gameCanvas { 
-            display: block; width: 100%; height: 100%; 
-            image-rendering: pixelated; /* Dělá tu správnou ostrou 8-bit grafiku */
-        }
-        #ui { 
-            position: absolute; top: 15px; left: 15px; 
-            font-size: 24px; font-weight: bold; pointer-events: none; z-index: 10; 
-        }
-        #message { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            font-size: 40px; text-align: center; color: red; display: none; 
-            z-index: 10; font-weight: bold; text-shadow: 3px 3px 0 #000; 
-        }
-        
-        /* Tlačítka pro mobilní telefony */
-        #mobile-controls {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            display: grid; grid-template-columns: 70px 70px 70px; grid-template-rows: 70px 70px; gap: 15px;
-            z-index: 20;
-        }
-        .btn {
-            background: rgba(255, 255, 255, 0.15); border: 2px solid #444; color: white;
-            font-size: 30px; border-radius: 12px; display: flex; justify-content: center; align-items: center;
-        }
-        .btn:active { background: rgba(255, 0, 0, 0.5); }
-        #btn-up { grid-column: 2; grid-row: 1; }
-        #btn-left { grid-column: 1; grid-row: 2; }
-        #btn-down { grid-column: 2; grid-row: 2; }
-        #btn-right { grid-column: 3; grid-row: 2; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Útěk ze Tmy</title>
+<style>
+  * { box-sizing: border-box; }
+  body, html {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: #000; overflow: hidden;
+    font-family: 'Press Start 2P', 'Courier New', monospace; color: #e8e8e8;
+    user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+  }
+  #gameCanvas {
+    display: block; width: 100%; height: 100%;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+  }
 
-        /* Skryje dotykové ovládání, pokud je člověk na počítači */
-        @media (min-width: 768px) { #mobile-controls { display: none; } }
-    </style>
+  /* ---- HUD ---- */
+  #hud {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 14px 16px; z-index: 10; pointer-events: none;
+  }
+  .hud-box {
+    background: rgba(10,10,14,0.72);
+    border: 2px solid #3a3a3a;
+    padding: 8px 12px;
+    font-size: 11px;
+    line-height: 1.6;
+    letter-spacing: 1px;
+    box-shadow: 0 0 0 1px #000, 0 4px 0 rgba(0,0,0,0.4);
+  }
+  #soulsBox { color: #f4e04d; }
+  #soulsBox .icon { color: #f4e04d; }
+  #healthWrap { width: 130px; }
+  #healthLabel { color: #c94f4f; font-size: 10px; margin-bottom: 4px; display:block; }
+  #healthBarOuter {
+    width: 100%; height: 12px; background: #1a1a1a; border: 2px solid #3a3a3a; position: relative;
+  }
+  #healthBarInner {
+    height: 100%; background: linear-gradient(#e05a5a,#a83232); transition: width 0.15s steps(6);
+    width: 100%;
+  }
+
+  #distBox { text-align: right; color: #7fb6ff; }
+
+  /* ---- Center message ---- */
+  #message {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    text-align: center; display: none; z-index: 30; width: 90%; max-width: 460px;
+  }
+  #message h1 {
+    font-size: 28px; margin: 0 0 14px 0; letter-spacing: 2px;
+    text-shadow: 3px 3px 0 #000, 0 0 20px currentColor;
+    animation: msgPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes msgPulse { 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.04);} }
+  #message p { font-size: 11px; color: #999; margin: 6px 0; line-height: 1.8; }
+  #retryBtn {
+    margin-top: 18px; display: inline-block; cursor: pointer;
+    background: #1a1a1a; border: 2px solid #666; color: #fff;
+    padding: 12px 22px; font-size: 12px; font-family: inherit;
+    letter-spacing: 1px;
+  }
+  #retryBtn:active { background: #333; border-color: #999; }
+
+  /* ---- Start overlay ---- */
+  #startOverlay {
+    position: absolute; inset: 0; background: #000; z-index: 40;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 20px;
+  }
+  #startOverlay h1 {
+    font-size: clamp(22px, 6vw, 38px); color: #c94f4f; letter-spacing: 3px;
+    text-shadow: 3px 3px 0 #000, 0 0 24px #6b1414;
+    margin-bottom: 10px;
+    animation: flicker 3s infinite;
+  }
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 80%, 100% { opacity: 1; }
+    20%, 22%, 81% { opacity: 0.55; }
+  }
+  #startOverlay .sub { color: #888; font-size: 10px; line-height: 2; max-width: 420px; margin-bottom: 24px; }
+  #startBtn {
+    background: #1a1a1a; border: 3px solid #c94f4f; color: #fff;
+    padding: 16px 34px; font-size: 14px; font-family: inherit; cursor: pointer;
+    letter-spacing: 2px; box-shadow: 0 0 20px rgba(201,79,79,0.4);
+  }
+  #startBtn:active { background: #c94f4f; }
+  #soundHint { margin-top: 14px; font-size: 9px; color: #555; }
+
+  /* ---- Mobile controls ---- */
+  #mobile-controls {
+    position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
+    display: grid; grid-template-columns: 62px 62px 62px; grid-template-rows: 62px 62px;
+    gap: 10px; z-index: 20;
+  }
+  .btn {
+    background: rgba(255,255,255,0.08); border: 2px solid #3a3a3a; color: #ccc;
+    font-size: 24px; border-radius: 10px; display: flex; justify-content: center; align-items: center;
+    backdrop-filter: blur(2px);
+  }
+  .btn:active { background: rgba(201,79,79,0.35); border-color: #c94f4f; }
+  #btn-up { grid-column: 2; grid-row: 1; }
+  #btn-left { grid-column: 1; grid-row: 2; }
+  #btn-down { grid-column: 2; grid-row: 2; }
+  #btn-right { grid-column: 3; grid-row: 2; }
+
+  @media (min-width: 768px) { #mobile-controls { display: none; } }
+
+  #vignette {
+    position: absolute; inset: 0; pointer-events: none; z-index: 5;
+    box-shadow: inset 0 0 140px 40px rgba(0,0,0,0.85);
+  }
+</style>
 </head>
 <body>
 
-    <div id="ui">Duše: <span id="score">0</span>/5</div>
-    <div id="message"></div>
-    <canvas id="gameCanvas"></canvas>
+<canvas id="gameCanvas"></canvas>
+<div id="vignette"></div>
 
-    <div id="mobile-controls">
-        <div class="btn" id="btn-up">⬆️</div>
-        <div class="btn" id="btn-left">⬅️</div>
-        <div class="btn" id="btn-down">⬇️</div>
-        <div class="btn" id="btn-right">➡️</div>
-    </div>
+<div id="hud" style="display:none;">
+  <div class="hud-box" id="soulsBox"><span class="icon">◆</span> DUŠE <span id="score">0</span>/5</div>
+  <div class="hud-box" id="healthWrap">
+    <span id="healthLabel">STRACH</span>
+    <div id="healthBarOuter"><div id="healthBarInner"></div></div>
+  </div>
+</div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreEl = document.getElementById('score');
-        const messageEl = document.getElementById('message');
+<div id="message"></div>
 
-        // Nastavení plátna přes celou obrazovku
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+<div id="startOverlay">
+  <h1>ÚTĚK ZE TMY</h1>
+  <div class="sub">
+    Seber 5 duší roztroušených ve tmě.<br>
+    Něco tě sleduje. Tvá baterka je jediná ochrana —<br>
+    ale čím déle svítí na jednom místě, tím slaběji září.<br><br>
+    <b style="color:#aaa">WASD / šipky</b> — pohyb &nbsp;•&nbsp; mobil — tlačítka
+  </div>
+  <div id="startBtn">▶ ZAČÍT</div>
+  <div id="soundHint">🔊 hraj se zapnutým zvukem</div>
+</div>
+
+<div id="mobile-controls">
+  <div class="btn" id="btn-up">⬆</div>
+  <div class="btn" id="btn-left">⬅</div>
+  <div class="btn" id="btn-down">⬇</div>
+  <div class="btn" id="btn-right">➡</div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const messageEl = document.getElementById('message');
+  const hud = document.getElementById('hud');
+  const healthBarInner = document.getElementById('healthBarInner');
+  const startOverlay = document.getElementById('startOverlay');
+  const startBtn = document.getElementById('startBtn');
+
+  const PIXEL = 3; // logical pixel scale for that crunchy 8-bit look
+  let W, H, cols, rows;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    W = canvas.width; H = canvas.height;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ============ AUDIO ============
+  let audioCtx = null;
+  let masterGain = null;
+  let droneOsc = null, droneGain = null;
+  let heartbeatTimer = null;
+  let footstepToggle = 0;
+
+  function initAudio() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.5;
+    masterGain.connect(audioCtx.destination);
+
+    // ambient drone
+    droneOsc = audioCtx.createOscillator();
+    droneOsc.type = 'sine';
+    droneOsc.frequency.value = 45;
+    droneGain = audioCtx.createGain();
+    droneGain.gain.value = 0.05;
+    droneOsc.connect(droneGain).connect(masterGain);
+    droneOsc.start();
+
+    const droneOsc2 = audioCtx.createOscillator();
+    droneOsc2.type = 'sine';
+    droneOsc2.frequency.value = 67;
+    const droneGain2 = audioCtx.createGain();
+    droneGain2.gain.value = 0.025;
+    droneOsc2.connect(droneGain2).connect(masterGain);
+    droneOsc2.start();
+  }
+
+  function beep(freq, duration, type='sine', vol=0.15, glideTo=null) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    if (glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, audioCtx.currentTime + duration);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain).connect(masterGain);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  }
+
+  function playPickup() {
+    beep(520, 0.08, 'square', 0.12);
+    setTimeout(()=>beep(780, 0.12, 'square', 0.1), 70);
+  }
+
+  function playFootstep() {
+    footstepToggle = 1 - footstepToggle;
+    beep(footstepToggle ? 90 : 78, 0.06, 'triangle', 0.05);
+  }
+
+  function playHeartbeat(intensity) {
+    if (!audioCtx) return;
+    beep(55, 0.09, 'sine', 0.18 * intensity);
+    setTimeout(()=>beep(50, 0.11, 'sine', 0.14 * intensity), 140);
+  }
+
+  function playJumpscare() {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(8, audioCtx.currentTime + 1.6);
+    gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.6);
+    osc.connect(gain).connect(masterGain);
+    osc.start(); osc.stop(audioCtx.currentTime + 1.6);
+
+    // noise burst
+    const bufferSize = audioCtx.sampleRate * 0.4;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i=0;i<bufferSize;i++) data[i] = (Math.random()*2-1) * (1 - i/bufferSize);
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.value = 0.5;
+    noise.connect(noiseGain).connect(masterGain);
+    noise.start();
+  }
+
+  function playWin() {
+    [0,1,2,3].forEach((n,i)=> setTimeout(()=>beep(440 * Math.pow(1.26, n), 0.22, 'square', 0.12), i*130));
+  }
+
+  // ============ GAME STATE ============
+  const player = { x: 0, y: 0, size: 11, speed: 3.6, facing: 0, animFrame: 0, animTimer: 0, moving:false };
+  const monster = { x: -200, y: -200, size: 15, speed: 1.5, animFrame:0, animTimer:0 };
+  let item = { x: 0, y: 0, size: 8, pulse: 0 };
+  let particles = [];
+  let dustMotes = [];
+
+  let score = 0;
+  let gameOver = false;
+  let gameStarted = false;
+  let keys = {};
+  let shakeAmount = 0;
+  let flashlightFlicker = 1;
+  let flashlightFatigue = 0; // grows if you stand still shining on one spot
+  let frameCount = 0;
+  let heartbeatInterval = null;
+
+  function resetGame() {
+    score = 0;
+    scoreEl.innerText = 0;
+    gameOver = false;
+    particles = [];
+    player.x = W/2; player.y = H/2;
+    player.speed = 3.6;
+    monster.speed = 1.35;
+    monster.x = Math.random() < 0.5 ? -100 : W + 100;
+    monster.y = Math.random() < 0.5 ? -100 : H + 100;
+    flashlightFatigue = 0;
+    healthBarInner.style.width = '100%';
+    spawnItem();
+    initDust();
+  }
+
+  function spawnItem() {
+    item.x = Math.random() * (W - 100) + 50;
+    item.y = Math.random() * (H - 100) + 50;
+  }
+
+  function initDust() {
+    dustMotes = [];
+    for (let i=0;i<40;i++) {
+      dustMotes.push({
+        x: Math.random()*W, y: Math.random()*H,
+        vx: (Math.random()-0.5)*0.15, vy: (Math.random()-0.5)*0.15,
+        size: Math.random()*1.5+0.5, alpha: Math.random()*0.3+0.1
+      });
+    }
+  }
+
+  // ============ INPUT ============
+  window.addEventListener('keydown', e => {
+    keys[e.key] = true;
+    if (!gameStarted) return;
+  });
+  window.addEventListener('keyup', e => { keys[e.key] = false; });
+
+  const bindBtn = (id, key) => {
+    const btn = document.getElementById(id);
+    btn.addEventListener('touchstart', e => { e.preventDefault(); keys[key] = true; }, {passive:false});
+    btn.addEventListener('touchend', e => { e.preventDefault(); keys[key] = false; }, {passive:false});
+    btn.addEventListener('mousedown', e => { keys[key] = true; });
+    btn.addEventListener('mouseup', e => { keys[key] = false; });
+  };
+  bindBtn('btn-up','ArrowUp'); bindBtn('btn-down','ArrowDown');
+  bindBtn('btn-left','ArrowLeft'); bindBtn('btn-right','ArrowRight');
+
+  startBtn.addEventListener('click', startGame);
+  startBtn.addEventListener('touchstart', e => { e.preventDefault(); startGame(); }, {passive:false});
+
+  function startGame() {
+    initAudio();
+    startOverlay.style.display = 'none';
+    hud.style.display = 'flex';
+    gameStarted = true;
+    resetGame();
+    let stepAcc = 0;
+    heartbeatInterval = setInterval(() => {
+      if (gameOver || !gameStarted) return;
+      const dist = Math.hypot(player.x-monster.x, player.y-monster.y);
+      const danger = Math.max(0, 1 - dist/420);
+      if (danger > 0.08) playHeartbeat(danger);
+    }, 900);
+    loop();
+  }
+
+  // ============ PARTICLES ============
+  function spawnParticles(x, y, color, count, speedMul=1) {
+    for (let i=0;i<count;i++) {
+      const angle = Math.random()*Math.PI*2;
+      const speed = (Math.random()*2+1)*speedMul;
+      particles.push({
+        x, y, color,
+        vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed,
+        life: 1, decay: Math.random()*0.02+0.02,
+        size: Math.random()*3+2
+      });
+    }
+  }
+
+  function updateParticles() {
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      p.vx *= 0.96; p.vy *= 0.96;
+      p.life -= p.decay;
+    });
+  }
+
+  // ============ UPDATE ============
+  function update() {
+    if (gameOver || !gameStarted) return;
+    frameCount++;
+
+    let dx=0, dy=0;
+    if (keys['ArrowUp']||keys['w']||keys['W']) dy -= 1;
+    if (keys['ArrowDown']||keys['s']||keys['S']) dy += 1;
+    if (keys['ArrowLeft']||keys['a']||keys['A']) dx -= 1;
+    if (keys['ArrowRight']||keys['d']||keys['D']) dx += 1;
+
+    player.moving = (dx!==0 || dy!==0);
+    if (player.moving) {
+      const len = Math.hypot(dx,dy) || 1;
+      player.x += (dx/len) * player.speed;
+      player.y += (dy/len) * player.speed;
+      if (dx !== 0) player.facing = dx > 0 ? 1 : -1;
+
+      player.animTimer++;
+      if (player.animTimer > 8) { player.animTimer = 0; player.animFrame = (player.animFrame+1)%4; }
+
+      if (frameCount % 18 === 0) playFootstep();
+
+      flashlightFatigue = Math.max(0, flashlightFatigue - 0.02);
+    } else {
+      flashlightFatigue = Math.min(1, flashlightFatigue + 0.006);
+    }
+
+    player.x = Math.max(player.size, Math.min(W - player.size, player.x));
+    player.y = Math.max(player.size, Math.min(H - player.size, player.y));
+
+    // monster AI - chases with slight wobble for organic feel
+    let mdx = player.x - monster.x;
+    let mdy = player.y - monster.y;
+    const distToMonster = Math.hypot(mdx, mdy);
+    if (distToMonster > 0) {
+      const wobble = Math.sin(frameCount*0.05)*0.3;
+      monster.x += (mdx/distToMonster) * monster.speed + wobble;
+      monster.y += (mdy/distToMonster) * monster.speed;
+    }
+    monster.animTimer++;
+    if (monster.animTimer > 10) { monster.animTimer=0; monster.animFrame=(monster.animFrame+1)%2; }
+
+    // danger shake + health bar reflect closeness
+    const danger = Math.max(0, 1 - distToMonster/380);
+    shakeAmount = danger * 5;
+    healthBarInner.style.width = (100 - danger*100).toFixed(0) + '%';
+
+    // flicker: worse when fatigued (staying still) or monster close
+    flashlightFlicker = 1 - flashlightFatigue*0.5 - danger*0.15;
+    if (Math.random() < 0.02 + danger*0.05) flashlightFlicker *= 0.5;
+
+    // dust motes drift
+    dustMotes.forEach(m => {
+      m.x += m.vx; m.y += m.vy;
+      if (m.x<0) m.x=W; if (m.x>W) m.x=0;
+      if (m.y<0) m.y=H; if (m.y>H) m.y=0;
+    });
+
+    // item pulse + collect
+    item.pulse += 0.15;
+    const idx = player.x - item.x, idy = player.y - item.y;
+    if (Math.hypot(idx, idy) < player.size + item.size) {
+      score++;
+      scoreEl.innerText = score;
+      monster.speed += 0.32;
+      spawnParticles(item.x, item.y, '#f4e04d', 18, 2);
+      playPickup();
+      if (score >= 5) winGame(); else spawnItem();
+    }
+
+    // caught
+    if (distToMonster < player.size + monster.size - 4) {
+      spawnParticles(player.x, player.y, '#c94f4f', 30, 3);
+      loseGame();
+    }
+
+    updateParticles();
+  }
+
+  // ============ DRAW HELPERS (pixel sprites via rects) ============
+  function drawPixelSprite(px, py, pattern, colorMap, scale, flip) {
+    const rows = pattern.length;
+    const cols = pattern[0].length;
+    for (let r=0;r<rows;r++) {
+      for (let c=0;c<cols;c++) {
+        const ch = pattern[r][flip ? cols-1-c : c];
+        if (ch === '.' ) continue;
+        ctx.fillStyle = colorMap[ch];
+        ctx.fillRect(
+          Math.round(px + c*scale - (cols*scale)/2),
+          Math.round(py + r*scale - (rows*scale)/2),
+          scale, scale
+        );
+      }
+    }
+  }
+
+  // simple humanoid, 2-frame walk cycle
+  const playerFrames = [
+    [
+      "..WW..",
+      ".WWWW.",
+      ".WWWW.",
+      "..PP..",
+      ".P..P.",
+      "F....F"
+    ],
+    [
+      "..WW..",
+      ".WWWW.",
+      ".WWWW.",
+      "..PP..",
+      "..PP..",
+      "F....F"
+    ]
+  ];
+  const playerColors = { W: '#f2f2f2', P: '#cfcfcf', F: '#8a8a8a' };
+
+  // creature, 2-frame
+  const monsterFrames = [
+    [
+      "..MM..",
+      ".MEEM.",
+      "MMMMMM",
+      "MMMMMM",
+      ".M..M.",
+      "M....M"
+    ],
+    [
+      ".MMMM.",
+      ".MEEM.",
+      "MMMMMM",
+      "MMMMMM",
+      "M....M",
+      ".M..M."
+    ]
+  ];
+  const monsterColors = { M: '#6b0f0f', E: '#ffde59' };
+
+  function draw() {
+    ctx.save();
+    if (shakeAmount > 0.1) {
+      ctx.translate((Math.random()-0.5)*shakeAmount, (Math.random()-0.5)*shakeAmount);
+    }
+
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(-20, -20, W+40, H+40);
+
+    if (!gameOver) {
+      // dust motes (subtle atmosphere, lit only near flashlight really but cheap glow ok)
+      dustMotes.forEach(m => {
+        const dm = Math.hypot(m.x-player.x, m.y-player.y);
+        if (dm < 170) {
+          ctx.fillStyle = `rgba(255,255,255,${m.alpha * (1-dm/170)})`;
+          ctx.fillRect(m.x, m.y, m.size, m.size);
         }
-        window.addEventListener('resize', resize);
-        resize();
+      });
 
-        // Proměnné hry
-        const player = { x: canvas.width/2, y: canvas.height/2, size: 12, speed: 4, color: '#fff' };
-        const monster = { x: -100, y: -100, size: 16, speed: 1.8, color: '#900' };
-        let item = { x: 0, y: 0, size: 8, color: '#ff0' };
-        
-        let score = 0;
-        let gameOver = false;
-        let keys = {}; // Drží stisknuté klávesy
+      // item (pulsing soul)
+      const pulseSize = item.size + Math.sin(item.pulse)*2;
+      ctx.save();
+      ctx.shadowColor = '#f4e04d';
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = '#f4e04d';
+      ctx.beginPath();
+      ctx.arc(item.x, item.y, pulseSize, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = '#fff8c9';
+      ctx.fillRect(item.x-2, item.y-2, 4, 4);
 
-        // Umístí novou duši náhodně na mapu
-        function spawnItem() {
-            item.x = Math.random() * (canvas.width - 60) + 30;
-            item.y = Math.random() * (canvas.height - 60) + 30;
-        }
+      // monster sprite
+      drawPixelSprite(monster.x, monster.y, monsterFrames[monster.animFrame], monsterColors, 4.2, false);
 
-        // --- OVLÁDÁNÍ PC ---
-        window.addEventListener('keydown', e => { keys[e.key] = true; });
-        window.addEventListener('keyup', e => { keys[e.key] = false; });
+      // particles
+      particles.forEach(p => {
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+      });
+      ctx.globalAlpha = 1;
 
-        // --- OVLÁDÁNÍ MOBIL ---
-        const bindBtn = (id, key) => {
-            const btn = document.getElementById(id);
-            // preventDefault zabrání rolování obrazovky při mačkání tlačítek
-            btn.addEventListener('touchstart', e => { e.preventDefault(); keys[key] = true; }, {passive: false});
-            btn.addEventListener('touchend', e => { e.preventDefault(); keys[key] = false; }, {passive: false});
-        };
-        bindBtn('btn-up', 'ArrowUp'); bindBtn('btn-down', 'ArrowDown');
-        bindBtn('btn-left', 'ArrowLeft'); bindBtn('btn-right', 'ArrowRight');
+      // player sprite
+      const frame = player.moving ? playerFrames[player.animFrame % 2] : playerFrames[0];
+      drawPixelSprite(player.x, player.y, frame, playerColors, 3.6, player.facing < 0);
 
-        function update() {
-            if (gameOver) return;
+      // ---- FLASHLIGHT ----
+      const radius = 155 * flashlightFlicker;
+      const grad = ctx.createRadialGradient(player.x, player.y, 30*flashlightFlicker, player.x, player.y, radius);
+      grad.addColorStop(0, 'rgba(0,0,0,0)');
+      grad.addColorStop(0.6, 'rgba(0,0,0,0.55)');
+      grad.addColorStop(1, 'rgba(0,0,0,0.97)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(-20, -20, W+40, H+40);
 
-            // Hráčův pohyb (reaguje na PC i Mobil)
-            if (keys['ArrowUp'] || keys['w'] || keys['W']) player.y -= player.speed;
-            if (keys['ArrowDown'] || keys['s'] || keys['S']) player.y += player.speed;
-            if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.x -= player.speed;
-            if (keys['ArrowRight'] || keys['d'] || keys['D']) player.x += player.speed;
+      // subtle warm tint near player like a real flashlight lens
+      const warm = ctx.createRadialGradient(player.x, player.y, 0, player.x, player.y, radius*0.5);
+      warm.addColorStop(0, `rgba(255,220,150,${0.06*flashlightFlicker})`);
+      warm.addColorStop(1, 'rgba(255,220,150,0)');
+      ctx.fillStyle = warm;
+      ctx.fillRect(-20,-20,W+40,H+40);
+    }
 
-            // Zastavení hráče o okraje obrazovky
-            player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
-            player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
+    ctx.restore();
+  }
 
-            // Umělá inteligence Monstra (letí za hráčem)
-            let dx = player.x - monster.x;
-            let dy = player.y - monster.y;
-            let distToMonster = Math.sqrt(dx*dx + dy*dy);
-            if (distToMonster > 0) {
-                monster.x += (dx / distToMonster) * monster.speed;
-                monster.y += (dy / distToMonster) * monster.speed;
-            }
+  function loop() {
+    update();
+    draw();
+    if (!gameOver && gameStarted) requestAnimationFrame(loop);
+  }
 
-            // Sebrání duše
-            let ix = player.x - item.x;
-            let iy = player.y - item.y;
-            if (Math.sqrt(ix*ix + iy*iy) < player.size + item.size) {
-                score++;
-                scoreEl.innerText = score;
-                monster.speed += 0.45; // Monstrum zrychlí
-                
-                if (score >= 5) winGame();
-                else spawnItem();
-            }
+  function loseGame() {
+    gameOver = true;
+    playJumpscare();
+    clearInterval(heartbeatInterval);
+    let flashFrame = 0;
+    const flashInterval = setInterval(() => {
+      flashFrame++;
+      ctx.fillStyle = flashFrame % 2 === 0 ? '#8a0000' : '#1a0000';
+      ctx.fillRect(0,0,W,H);
+      if (flashFrame > 5) {
+        clearInterval(flashInterval);
+        showMessage('#c94f4f', 'NAŠLO TĚ TO', `Sebral jsi ${score} z 5 duší.`);
+      }
+    }, 90);
+    document.getElementById('mobile-controls').style.display = 'none';
+  }
 
-            // Monstrum chytilo hráče
-            if (distToMonster < player.size + monster.size) {
-                loseGame();
-            }
-        }
+  function winGame() {
+    gameOver = true;
+    playWin();
+    clearInterval(heartbeatInterval);
+    ctx.fillStyle = '#001a08';
+    ctx.fillRect(0,0,W,H);
+    showMessage('#5be36a', 'PŘEŽIL JSI', 'Všech 5 duší je volných.');
+    document.getElementById('mobile-controls').style.display = 'none';
+  }
 
-        function draw() {
-            // Černé pozadí
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+  function showMessage(color, title, sub) {
+    messageEl.innerHTML = `
+      <h1 style="color:${color}">${title}</h1>
+      <p>${sub}</p>
+      <div id="retryBtn">▶ HRÁT ZNOVU</div>
+    `;
+    messageEl.style.display = 'block';
+    const retry = document.getElementById('retryBtn');
+    const restart = () => {
+      messageEl.style.display = 'none';
+      document.getElementById('mobile-controls').style.display = '';
+      resetGame();
+      loop();
+    };
+    retry.addEventListener('click', restart);
+    retry.addEventListener('touchstart', e => { e.preventDefault(); restart(); }, {passive:false});
+  }
 
-            if (gameOver) return;
-
-            // Nakresli Duši (žlutá)
-            ctx.fillStyle = item.color;
-            ctx.fillRect(item.x - item.size, item.y - item.size, item.size*2, item.size*2);
-
-            // Nakresli Monstrum (krvavá červená)
-            ctx.fillStyle = monster.color;
-            ctx.fillRect(monster.x - monster.size, monster.y - monster.size, monster.size*2, monster.size*2);
-
-            // Nakresli Hráče (bílá)
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x - player.size, player.y - player.size, player.size*2, player.size*2);
-
-            // --- HOROROVÝ EFEKT BATERKY ---
-            // Vytvoří tmu kolem hráče, vidí jen kousek
-            let gradient = ctx.createRadialGradient(player.x, player.y, 40, player.x, player.y, 160);
-            gradient.addColorStop(0, 'rgba(0,0,0,0)');       // Průhledný střed
-            gradient.addColorStop(1, 'rgba(0,0,0,0.98)');    // Neprůhledná tma na okrajích
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // Hlavní smyčka hry
-        function loop() {
-            update();
-            draw();
-            if (!gameOver) requestAnimationFrame(loop);
-        }
-
-        // --- ZVUK A JUMPSCARE PŘI PROHŘE ---
-        function loseGame() {
-            gameOver = true;
-            ctx.fillStyle = '#600000'; // Obrazovka zrudne krví
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Generování strašidelného zvuku čistě přes kód (bez nutnosti MP3)
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                osc.type = 'sawtooth'; // Ostrý, nepříjemný zvuk
-                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 1.5);
-                osc.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 1.5);
-            } catch(e) { console.log("Zvuk není podporován"); }
-
-            messageEl.innerHTML = "NAŠLO TĚ TO.<br><br><span style='font-size:20px; cursor:pointer; color: white; text-decoration: underline;' onclick='location.reload()'>Zkusit znovu</span>";
-            messageEl.style.display = 'block';
-            document.getElementById('mobile-controls').style.display = 'none'; // Schová tlačítka
-        }
-
-        function winGame() {
-            gameOver = true;
-            ctx.fillStyle = '#002200'; // Temně zelená pro výhru
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            messageEl.style.color = '#0f0';
-            messageEl.innerHTML = "PŘEŽIL JSI!<br><br><span style='font-size:20px; cursor:pointer; color: white; text-decoration: underline;' onclick='location.reload()'>Hrát znovu</span>";
-            messageEl.style.display = 'block';
-            document.getElementById('mobile-controls').style.display = 'none';
-        }
-
-        // Spuštění hry
-        spawnItem();
-        // Monstrum se spawne schválně mimo obrazovku, aby dal hráči 1 vteřinu náskok
-        monster.x = Math.random() < 0.5 ? -100 : canvas.width + 100; 
-        monster.y = Math.random() < 0.5 ? -100 : canvas.height + 100;
-        loop();
-    </script>
+})();
+</script>
 </body>
 </html>
-
