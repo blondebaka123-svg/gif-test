@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" id="htmlRoot">
 <head>
@@ -206,6 +207,20 @@
 </style>
 </head>
 <body>
+
+<!-- Intro Modal -->
+<div id="introModal" style="position:fixed; inset:0; z-index:100; background:rgba(33, 26, 46, 0.85); display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter:blur(3px);">
+  <div style="background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:30px; text-align:center; max-width:400px; box-shadow:0 10px 40px rgba(0,0,0,0.5);">
+    <h2 style="margin-top:0; color:var(--peach); font-family:'Comfortaa', sans-serif;">Welcome to Golden Click ⋆</h2>
+    <p style="font-size:14px; color:var(--dim); line-height:1.6; margin-bottom:24px;">
+      The rules are simple: click the button to open a case and find surprises. 
+      Keep what you find, build your collection, and try to hit that rare 0.10% gold drop!
+    </p>
+    <button id="startBtn" style="background:var(--peach); color:#2a2140; font-family:'Comfortaa', sans-serif; font-weight:700; border:none; padding:12px 24px; border-radius:8px; cursor:pointer; font-size:14px; transition: filter 0.2s;">
+      Let's Play
+    </button>
+  </div>
+</div>
 
 <div class="sky" id="sky"></div>
 <div id="flash"></div>
@@ -628,6 +643,15 @@
     loadVideo(id, true);
     playing=true;
     musicToggle.textContent = t().pause;
+  });
+
+  /* ---------- intro modal ---------- */
+  document.getElementById('startBtn').addEventListener('click', () => {
+    const modal = document.getElementById('introModal');
+    modal.style.opacity = '0';
+    modal.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => modal.style.display = 'none', 300);
+    sndClick(); 
   });
 
   renderStats();
