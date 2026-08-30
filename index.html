@@ -1,6 +1,5 @@
-
 <!DOCTYPE html>
-<html lang="en" id="htmlRoot">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,14 +39,6 @@
   .sky{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
   .dot{ position:absolute; width:3px; height:3px; background:var(--gold2); border-radius:50%; opacity:0.35; animation:drift 14s linear infinite; }
   @keyframes drift{ 0%{ transform:translateY(0);} 100%{ transform:translateY(-120vh);} }
-
-  .langbar{ position:relative; z-index:1; display:flex; justify-content:center; gap:6px; margin-bottom:10px; }
-  .langbar button{
-    background:var(--panel2); border:1px solid var(--line); color:var(--dim);
-    font-family:'Quicksand',sans-serif; font-size:11px; letter-spacing:1px;
-    padding:5px 12px; border-radius:999px; cursor:pointer; font-weight:600;
-  }
-  .langbar button.active{ background:var(--peach); color:#2a2140; border-color:var(--peach); }
 
   header{ text-align:center; margin-bottom:16px; position:relative; z-index:1; }
   .tag{ font-size:11px; letter-spacing:3px; color:var(--dim); text-transform:uppercase; }
@@ -175,7 +166,7 @@
     margin:0; padding:14px 16px 10px; text-transform:uppercase; border-bottom:1px solid var(--line);
     display:flex; justify-content:space-between; align-items:center;
   }
-  .panel h2 span.count{ color:var(--peach); font-size:11px; text-transform:none; letter-spacing:0; }
+  .panel h2 span.count{ color:var(--peach); font-size:11px; }
 
   .inv-grid{
     display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; padding:14px;
@@ -186,8 +177,8 @@
     transition:transform 0.15s ease;
   }
   .inv-item.locked{ opacity:0.35; filter:grayscale(1); }
-  .inv-item .icon{ font-size:24px; display:block; margin-bottom:4px; }
-  .inv-item .name{ font-size:9.5px; color:var(--dim); letter-spacing:0.3px; text-transform:uppercase; }
+  .inv-item .icon{ font-size:26px; display:block; margin-bottom:4px; }
+  .inv-item .name{ font-size:10px; color:var(--dim); letter-spacing:0.5px; text-transform:uppercase; }
   .inv-item .qty{ font-size:14px; font-weight:700; font-family:'Comfortaa',sans-serif; margin-top:2px; }
   .inv-item.gold-item{ border-color:var(--gold); box-shadow:0 0 16px rgba(255,214,107,0.15); }
   .inv-item.gold-item .qty{ color:var(--gold); }
@@ -208,81 +199,62 @@
 </head>
 <body>
 
-<!-- Intro Modal -->
-<div id="introModal" style="position:fixed; inset:0; z-index:100; background:rgba(33, 26, 46, 0.85); display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter:blur(3px);">
-  <div style="background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:30px; text-align:center; max-width:400px; box-shadow:0 10px 40px rgba(0,0,0,0.5);">
-    <h2 style="margin-top:0; color:var(--peach); font-family:'Comfortaa', sans-serif;">Welcome to Golden Click ⋆</h2>
-    <p style="font-size:14px; color:var(--dim); line-height:1.6; margin-bottom:24px;">
-      The rules are simple: click the button to open a case and find surprises. 
-      Keep what you find, build your collection, and try to hit that rare 0.10% gold drop!
-    </p>
-    <button id="startBtn" style="background:var(--peach); color:#2a2140; font-family:'Comfortaa', sans-serif; font-weight:700; border:none; padding:12px 24px; border-radius:8px; cursor:pointer; font-size:14px; transition: filter 0.2s;">
-      Let's Play
-    </button>
-  </div>
-</div>
-
 <div class="sky" id="sky"></div>
 <div id="flash"></div>
-<div id="goldBanner"></div>
-<div id="achToast"><span class="ico">🏆</span><span class="txt"><b id="achToastTitle"></b><span id="achToastText"></span></span></div>
+<div id="goldBanner">◆ ✨ GOLDEN CLICK — RARE DROP ✨ ◆</div>
+<div id="achToast"><span class="ico">🏆</span><span class="txt"><b>ACHIEVEMENT UNLOCKED</b><span id="achToastText"></span></span></div>
 
 <div class="wrap">
-  <div class="langbar">
-    <button id="langEN" class="active" data-lang="en">EN</button>
-    <button id="langCZ" data-lang="cz">CZ</button>
-  </div>
-
   <header>
-    <div class="tag" id="txtTag"></div>
-    <h1 id="txtTitle"></h1>
-    <div class="sub" id="txtSub"></div>
+    <div class="tag">// cozy case simulator</div>
+    <h1>golden click ⋆</h1>
+    <div class="sub">click for a surprise, keep what you find</div>
   </header>
 
   <div class="music">
     <div class="music-top">
-      <div class="music-title"><span class="note">♪</span> <span id="txtMusicTitle"></span></div>
-      <button class="music-toggle" id="musicToggle"></button>
+      <div class="music-title"><span class="note">♪</span> lofi radio</div>
+      <button class="music-toggle" id="musicToggle">▶ play</button>
     </div>
     <select id="stationSelect">
       <option value="E2vONfzoyRI">jazz lofi radio ☕</option>
       <option value="1Tl2FtV06qo">asian lofi radio ⛩️</option>
-      <option value="DGBLvi795tc">lofi + rain 🌧️</option>
+      <option value="DGBLvi795tc">lofi + rain 🌧️ study/chill</option>
     </select>
     <div class="custom-row">
-      <input class="yt-input" id="ytInput">
-      <button id="ytLoad"></button>
+      <input class="yt-input" id="ytInput" placeholder="paste any YouTube link or video ID…">
+      <button id="ytLoad">load</button>
     </div>
     <div id="playerBox"><div id="ytPlayer"></div></div>
   </div>
 
   <div class="stage">
     <div class="stat-row">
-      <div><span id="txtStatClicks"></span><b id="clickCount">0</b></div>
-      <div><span id="txtStatItems"></span><b id="itemCount">0</b></div>
-      <div><span id="txtStatGold"></span><b id="goldCount" style="color:var(--gold)">0</b></div>
+      <div>CLICKS<b id="clickCount">0</b></div>
+      <div>ITEMS FOUND<b id="itemCount">0</b></div>
+      <div>GOLD<b id="goldCount" style="color:var(--gold)">0</b></div>
     </div>
 
     <button id="clickBtn">
-      <span class="lbl" id="txtClickLbl"></span>
-      <span class="sm" id="txtClickSm"></span>
+      <span class="lbl">🎁 click for surprise</span>
+      <span class="sm">open case</span>
     </button>
 
-    <div class="odds" id="txtOdds"></div>
+    <div class="odds">gold drop chance: <b>0.10%</b> per click</div>
     <div id="feed"></div>
   </div>
 
   <div class="panel">
-    <h2><span id="txtInvHeader"></span> <span class="count" id="invTotal"></span></h2>
+    <h2>Inventory <span class="count" id="invTotal">0 items</span></h2>
     <div class="inv-grid" id="invGrid"></div>
   </div>
 
   <div class="panel">
-    <h2><span id="txtAchHeader"></span> <span class="count" id="achTotal"></span></h2>
+    <h2>Achievements <span class="count" id="achTotal">0/0</span></h2>
     <div class="ach-list" id="achList"></div>
   </div>
 
-  <footer id="txtFooter"></footer>
+  <footer>progress saves to this browser · sound on 🔊 · vibes only</footer>
 </div>
 
 <script>
@@ -299,7 +271,6 @@
     sky.appendChild(d);
   }
 
-  /* ---------- audio ---------- */
   let actx;
   function ctx(){ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); return actx; }
   function tone(freq, dur, type, gainMax, delay){
@@ -322,145 +293,56 @@
   function sndUncommon(){ tone(523, 0.1, 'triangle', 0.09); tone(659, 0.14, 'triangle', 0.08, 0.05); }
   function sndRare(){ tone(659, 0.1, 'sine', 0.1); tone(880, 0.16, 'sine', 0.09, 0.06); }
   function sndEpic(){ tone(587, 0.1, 'sawtooth', 0.06); tone(880, 0.12, 'sine', 0.09, 0.07); tone(1175, 0.18, 'sine', 0.08, 0.14); }
-  function sndGold(){ [523,659,784,1047,1319].forEach((f,i)=> tone(f, 0.25, 'sine', 0.11, i*0.08)); }
+  function sndGold(){
+    [523,659,784,1047,1319].forEach((f,i)=> tone(f, 0.25, 'sine', 0.11, i*0.08));
+  }
   function sndAch(){ tone(784,0.1,'triangle',0.08); tone(988,0.14,'triangle',0.08,0.09); }
 
-  /* ---------- i18n ---------- */
-  const I18N = {
-    en:{
-      tag:'// cozy case simulator',
-      title:'golden click ⋆',
-      sub:'click for a surprise, keep what you find',
-      musicTitle:'lofi radio',
-      play:'▶ play', pause:'⏸ playing',
-      ytPlaceholder:'paste any YouTube link or video ID…',
-      ytLoad:'load',
-      ytError:"hmm, couldn't read that link — try again",
-      clickLbl:'🎁 click for surprise', clickSm:'open case',
-      odds:'gold drop chance: <b>0.10%</b> per click',
-      statClicks:'CLICKS', statItems:'ITEMS FOUND', statGold:'GOLD',
-      invHeader:'Inventory', invCount:n=>n+' items',
-      achHeader:'Achievements', achToastTitle:'ACHIEVEMENT UNLOCKED',
-      footer:'progress saves to this browser · sound on 🔊 · vibes only',
-      goldBanner:'◆ ✨ GOLDEN CLICK — RARE DROP ✨ ◆',
-      foundPrefix:'found: ', nothingMsg:'nothing this time…',
-      goldMsg:'★ GOLDEN CLICK — added to inventory ★',
-      items:{
-        leaf:'leaf', pebble:'pebble', seashell:'seashell', clover:'clover',
-        orb:'orb', gem:'gem', butterfly:'butterfly', crown:'crown', gold:'★ gold ★'
-      },
-      ach:{
-        first_click:['First Steps','click once'],
-        c100:['Warming Up','100 clicks'],
-        c500:['Dedicated','500 clicks'],
-        c2000:['No Life (affectionate)','2000 clicks'],
-        first_item:['First Find','find your first item'],
-        coll25:['Collector','25 items found'],
-        coll100:['Hoarder','100 items found'],
-        first_rare:['Rare Sighting','find an orb'],
-        first_epic:['Epic Moment','find a crown'],
-        first_gold:['Golden','the rare 0.10% drop'],
-        gold5:['Golden Touch','5 golden clicks'],
-        gold10:['Certified Lucky','10 golden clicks'],
-      }
-    },
-    cz:{
-      tag:'// útulný case simulátor',
-      title:'zlatý klik ⋆',
-      sub:'klikni pro překvapení a nech si, co najdeš',
-      musicTitle:'lofi rádio',
-      play:'▶ přehrát', pause:'⏸ hraje',
-      ytPlaceholder:'vlož jakýkoliv YouTube odkaz nebo ID videa…',
-      ytLoad:'načíst',
-      ytError:'hmm, tenhle odkaz nejde přečíst — zkus to znovu',
-      clickLbl:'🎁 klikni pro překvapení', clickSm:'otevřít balíček',
-      odds:'šance na zlatý úlovek: <b>0,10 %</b> na klik',
-      statClicks:'KLIKŮ', statItems:'NALEZENO', statGold:'ZLATO',
-      invHeader:'Inventář', invCount:n=>n+' předmětů',
-      achHeader:'Úspěchy', achToastTitle:'ÚSPĚCH ODEMČEN',
-      footer:'postup se ukládá v tomto prohlížeči · zvuk zapnut 🔊 · jen pohoda',
-      goldBanner:'◆ ✨ ZLATÝ KLIK — VZÁCNÝ ÚLOVEK ✨ ◆',
-      foundPrefix:'nalezeno: ', nothingMsg:'tentokrát nic…',
-      goldMsg:'★ ZLATÝ KLIK — přidáno do inventáře ★',
-      items:{
-        leaf:'lístek', pebble:'oblázek', seashell:'mušlička', clover:'jetel',
-        orb:'koule', gem:'drahokam', butterfly:'motýl', crown:'koruna', gold:'★ zlato ★'
-      },
-      ach:{
-        first_click:['První krok','klikni jednou'],
-        c100:['Rozehřátí','100 kliků'],
-        c500:['Odhodlaný','500 kliků'],
-        c2000:['Žádný život (s láskou)','2000 kliků'],
-        first_item:['První nález','najdi svůj první předmět'],
-        coll25:['Sběratel','25 nalezených předmětů'],
-        coll100:['Hromadič','100 nalezených předmětů'],
-        first_rare:['Vzácné zahlédnutí','najdi kouli'],
-        first_epic:['Epický moment','najdi korunu'],
-        first_gold:['Zlatý','vzácný úlovek s šancí 0,10 %'],
-        gold5:['Zlatý dotek','5 zlatých kliků'],
-        gold10:['Ověřené štěstí','10 zlatých kliků'],
-      }
-    }
-  };
-
-  let lang = 'en';
-  try{ const l = localStorage.getItem('golden_click_lang'); if (l==='en'||l==='cz') lang=l; }catch(e){}
-
-  function t(){ return I18N[lang]; }
-
-  /* ---------- state ---------- */
-  const SAVE_KEY = 'golden_click_save_v3';
+  const SAVE_KEY = 'golden_click_save_v2';
   let state = {
     clicks:0, items:0, golds:0,
-    inv:{ leaf:0, pebble:0, seashell:0, clover:0, orb:0, gem:0, butterfly:0, crown:0, gold:0 },
+    inv:{ common:0, uncommon:0, rare:0, epic:0, gold:0 },
     ach:{}
   };
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
     if (s) state = Object.assign(state, s);
   } catch(e){}
-  function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){} }
+
+  function save(){
+    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){}
+  }
 
   const tiers = [
-    { key:'nothing',   icon:'💨', cls:'t-common',   chance:40,   snd:sndNothing },
-    { key:'leaf',      icon:'🍂', cls:'t-common',   chance:20,   snd:sndCommon },
-    { key:'pebble',    icon:'🪨', cls:'t-common',   chance:15,   snd:sndCommon },
-    { key:'seashell',  icon:'🐚', cls:'t-uncommon', chance:10,   snd:sndUncommon },
-    { key:'clover',    icon:'🍀', cls:'t-uncommon', chance:6,    snd:sndUncommon },
-    { key:'orb',       icon:'🔮', cls:'t-rare',     chance:4,    snd:sndRare },
-    { key:'gem',       icon:'💎', cls:'t-rare',     chance:2.5,  snd:sndRare },
-    { key:'butterfly', icon:'🦋', cls:'t-epic',     chance:1.5,  snd:sndEpic },
-    { key:'crown',     icon:'👑', cls:'t-epic',     chance:0.9,  snd:sndEpic },
-    { key:'gold',      icon:'🌟', cls:'t-gold',     chance:0.10, snd:sndGold },
+    { key:'nothing',   name:'nothing',    icon:'💨', cls:'t-common',   chance:55,    snd:sndNothing },
+    { key:'common',    name:'pebble',     icon:'🪨', cls:'t-common',   chance:25,    snd:sndCommon },
+    { key:'uncommon',  name:'clover',     icon:'🍀', cls:'t-uncommon', chance:12,    snd:sndUncommon },
+    { key:'rare',      name:'gem',        icon:'💎', cls:'t-rare',     chance:6,     snd:sndRare },
+    { key:'epic',      name:'crown',      icon:'👑', cls:'t-epic',     chance:1.9,   snd:sndEpic },
+    { key:'gold',      name:'★ gold ★',   icon:'🌟', cls:'t-gold',     chance:0.10,  snd:sndGold },
   ];
 
   function rollTier(){
     const r = Math.random()*100;
     let acc=0;
-    for (const tr of tiers){ acc+=tr.chance; if (r<=acc) return tr; }
+    for (const t of tiers){ acc+=t.chance; if (r<=acc) return t; }
     return tiers[0];
   }
 
-  const achDefs = ['first_click','c100','c500','c2000','first_item','coll25','coll100','first_rare','first_epic','first_gold','gold5','gold10'];
-  const achChecks = {
-    first_click:s=>s.clicks>=1,
-    c100:s=>s.clicks>=100,
-    c500:s=>s.clicks>=500,
-    c2000:s=>s.clicks>=2000,
-    first_item:s=>s.items>=1,
-    coll25:s=>s.items>=25,
-    coll100:s=>s.items>=100,
-    first_rare:s=>s.inv.orb>=1,
-    first_epic:s=>s.inv.crown>=1,
-    first_gold:s=>s.golds>=1,
-    gold5:s=>s.golds>=5,
-    gold10:s=>s.golds>=10,
-  };
-  const achIcons = {
-    first_click:'👋', c100:'🖱️', c500:'🔥', c2000:'🌙', first_item:'📦',
-    coll25:'🧺', coll100:'🏺', first_rare:'🔮', first_epic:'👑', first_gold:'🌟',
-    gold5:'✨', gold10:'👑'
-  };
+  const achievements = [
+    { id:'first_click', icon:'👋', name:'First Steps', desc:'click once', check:s=>s.clicks>=1 },
+    { id:'c100',  icon:'🖱️', name:'Warming Up', desc:'100 clicks', check:s=>s.clicks>=100 },
+    { id:'c500', icon:'🔥', name:'Dedicated', desc:'500 clicks', check:s=>s.clicks>=500 },
+    { id:'c2000',icon:'🌙', name:'No Life (affectionate)', desc:'2000 clicks', check:s=>s.clicks>=2000 },
+    { id:'first_item', icon:'📦', name:'First Find', desc:'find your first item', check:s=>s.items>=1 },
+    { id:'coll25', icon:'🧺', name:'Collector', desc:'25 items found', check:s=>s.items>=25 },
+    { id:'coll100', icon:'🏺', name:'Hoarder', desc:'100 items found', check:s=>s.items>=100 },
+    { id:'first_rare', icon:'💎', name:'Rare Sighting', desc:'find a gem', check:s=>s.inv.rare>=1 },
+    { id:'first_epic', icon:'👑', name:'Epic Moment', desc:'find a crown', check:s=>s.inv.epic>=1 },
+    { id:'first_gold', icon:'🌟', name:'Golden', desc:'the rare 0.10% drop', check:s=>s.golds>=1 },
+    { id:'gold5', icon:'✨', name:'Golden Touch', desc:'5 golden clicks', check:s=>s.golds>=5 },
+    { id:'gold10', icon:'👑', name:'Certified Lucky', desc:'10 golden clicks', check:s=>s.golds>=10 },
+  ];
 
   const clickBtn=document.getElementById('clickBtn');
   const clickCountEl=document.getElementById('clickCount');
@@ -471,7 +353,6 @@
   const banner=document.getElementById('goldBanner');
   const achToast=document.getElementById('achToast');
   const achToastText=document.getElementById('achToastText');
-  const achToastTitle=document.getElementById('achToastTitle');
 
   function popFeed(text, cls){
     const d=document.createElement('div');
@@ -479,20 +360,20 @@
     feed.innerHTML=''; feed.appendChild(d);
   }
   function goldMoment(){
-    banner.textContent = t().goldBanner;
     flash.classList.add('on'); banner.classList.add('show');
     setTimeout(()=>flash.classList.remove('on'),300);
     setTimeout(()=>banner.classList.remove('show'),1800);
   }
   let toastQueue=[], toastBusy=false;
-  function queueAch(id){ toastQueue.push(id); if(!toastBusy) drainToast(); }
+  function queueAch(a){
+    toastQueue.push(a);
+    if(!toastBusy) drainToast();
+  }
   function drainToast(){
     if(!toastQueue.length){ toastBusy=false; return; }
     toastBusy=true;
-    const id=toastQueue.shift();
-    const [name,desc] = t().ach[id];
-    achToastTitle.textContent = t().achToastTitle;
-    achToastText.textContent = ' ' + name + ' — ' + desc;
+    const a=toastQueue.shift();
+    achToastText.textContent = a.name + ' — ' + a.desc;
     achToast.classList.add('show');
     sndAch();
     setTimeout(()=>{
@@ -500,46 +381,44 @@
       setTimeout(drainToast, 350);
     }, 2200);
   }
+
   function checkAchievements(){
-    achDefs.forEach(id=>{
-      if (!state.ach[id] && achChecks[id](state)){
-        state.ach[id]=true;
-        queueAch(id);
+    achievements.forEach(a=>{
+      if (!state.ach[a.id] && a.check(state)){
+        state.ach[a.id]=true;
+        queueAch(a);
       }
     });
   }
 
   function renderInv(){
     const grid=document.getElementById('invGrid');
-    const itemKeys = ['leaf','pebble','seashell','clover','orb','gem','butterfly','crown','gold'];
-    grid.innerHTML = itemKeys.map(key=>{
-      const tr = tiers.find(x=>x.key===key);
-      const qty = state.inv[key]||0;
+    grid.innerHTML = tiers.filter(t=>t.key!=='nothing').map(t=>{
+      const qty = state.inv[t.key]||0;
       const locked = qty===0;
-      return `<div class="inv-item ${locked?'locked':''} ${key==='gold'?'gold-item':''}">
-        <span class="icon">${locked?'❔':tr.icon}</span>
-        <div class="name">${t().items[key]}</div>
+      return `<div class="inv-item ${locked?'locked':''} ${t.key==='gold'?'gold-item':''}">
+        <span class="icon">${locked?'❔':t.icon}</span>
+        <div class="name">${t.name}</div>
         <div class="qty">${qty}</div>
       </div>`;
     }).join('');
-    document.getElementById('invTotal').textContent = t().invCount(state.items);
+    document.getElementById('invTotal').textContent = state.items + ' items';
   }
 
   function renderAch(){
     const list=document.getElementById('achList');
-    list.innerHTML = achDefs.map(id=>{
-      const unlocked = !!state.ach[id];
-      const [name,desc] = t().ach[id];
+    list.innerHTML = achievements.map(a=>{
+      const unlocked = !!state.ach[a.id];
       return `<div class="ach-row ${unlocked?'unlocked':'locked'}">
-        <div class="ico">${unlocked?achIcons[id]:'🔒'}</div>
+        <div class="ico">${unlocked?a.icon:'🔒'}</div>
         <div>
-          <div class="name">${name}</div>
-          <div class="desc">${desc}</div>
+          <div class="name">${a.name}</div>
+          <div class="desc">${a.desc}</div>
         </div>
       </div>`;
     }).join('');
-    const unlockedCount = achDefs.filter(id=>state.ach[id]).length;
-    document.getElementById('achTotal').textContent = unlockedCount+'/'+achDefs.length;
+    const unlockedCount = achievements.filter(a=>state.ach[a.id]).length;
+    document.getElementById('achTotal').textContent = unlockedCount+'/'+achievements.length;
   }
 
   function renderStats(){
@@ -547,33 +426,6 @@
     itemCountEl.textContent = state.items.toLocaleString();
     goldCountEl.textContent = state.golds.toLocaleString();
   }
-
-  function applyLanguage(){
-    const d = t();
-    document.getElementById('htmlRoot').lang = lang;
-    document.getElementById('txtTag').textContent = d.tag;
-    document.getElementById('txtTitle').textContent = d.title;
-    document.getElementById('txtSub').textContent = d.sub;
-    document.getElementById('txtMusicTitle').textContent = d.musicTitle;
-    document.getElementById('musicToggle').textContent = playing ? d.pause : d.play;
-    document.getElementById('ytInput').placeholder = d.ytPlaceholder;
-    document.getElementById('ytLoad').textContent = d.ytLoad;
-    document.getElementById('txtClickLbl').textContent = d.clickLbl;
-    document.getElementById('txtClickSm').textContent = d.clickSm;
-    document.getElementById('txtOdds').innerHTML = d.odds;
-    document.getElementById('txtStatClicks').textContent = d.statClicks;
-    document.getElementById('txtStatItems').textContent = d.statItems;
-    document.getElementById('txtStatGold').textContent = d.statGold;
-    document.getElementById('txtInvHeader').textContent = d.invHeader;
-    document.getElementById('txtAchHeader').textContent = d.achHeader;
-    document.getElementById('txtFooter').textContent = d.footer;
-    document.getElementById('langEN').classList.toggle('active', lang==='en');
-    document.getElementById('langCZ').classList.toggle('active', lang==='cz');
-    renderInv(); renderAch();
-  }
-
-  document.getElementById('langEN').addEventListener('click', ()=>{ lang='en'; try{localStorage.setItem('golden_click_lang',lang);}catch(e){} applyLanguage(); });
-  document.getElementById('langCZ').addEventListener('click', ()=>{ lang='cz'; try{localStorage.setItem('golden_click_lang',lang);}catch(e){} applyLanguage(); });
 
   clickBtn.addEventListener('click', () => {
     state.clicks++;
@@ -585,14 +437,14 @@
       state.inv[tier.key] = (state.inv[tier.key]||0)+1;
       if (tier.key==='gold'){
         state.golds++;
-        popFeed(t().goldMsg, tier.cls);
+        popFeed('★ GOLDEN CLICK — added to inventory ★', tier.cls);
         goldMoment();
       } else {
-        popFeed(t().foundPrefix + t().items[tier.key], tier.cls);
+        popFeed('found: '+tier.name, tier.cls);
       }
       setTimeout(tier.snd, 0);
     } else {
-      popFeed(t().nothingMsg, tier.cls);
+      popFeed('nothing this time…', tier.cls);
       setTimeout(tier.snd, 0);
     }
 
@@ -601,7 +453,8 @@
     save();
   });
 
-  /* ---------- youtube player ---------- */
+  renderStats(); renderInv(); renderAch();
+
   const stationSelect=document.getElementById('stationSelect');
   const musicToggle=document.getElementById('musicToggle');
   const playerBox=document.getElementById('playerBox');
@@ -626,36 +479,25 @@
   musicToggle.addEventListener('click', ()=>{
     if (!playing){
       loadVideo(stationSelect.value, true);
+      musicToggle.textContent='⏸ playing';
       playing=true;
     } else {
       playerBox.style.display='none';
       ytPlayer.innerHTML='';
+      musicToggle.textContent='▶ play';
       playing=false;
     }
-    musicToggle.textContent = playing ? t().pause : t().play;
   });
   stationSelect.addEventListener('change', ()=>{
     if (playing) loadVideo(stationSelect.value, true);
   });
   ytLoad.addEventListener('click', ()=>{
     const id = extractId(ytInput.value);
-    if (!id){ ytInput.placeholder = t().ytError; return; }
+    if (!id){ ytInput.placeholder="hmm, couldn't read that link — try again"; return; }
     loadVideo(id, true);
+    musicToggle.textContent='⏸ playing';
     playing=true;
-    musicToggle.textContent = t().pause;
   });
-
-  /* ---------- intro modal ---------- */
-  document.getElementById('startBtn').addEventListener('click', () => {
-    const modal = document.getElementById('introModal');
-    modal.style.opacity = '0';
-    modal.style.transition = 'opacity 0.3s ease';
-    setTimeout(() => modal.style.display = 'none', 300);
-    sndClick(); 
-  });
-
-  renderStats();
-  applyLanguage();
 })();
 </script>
 
