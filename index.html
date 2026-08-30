@@ -1,637 +1,505 @@
-
-
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Útěk ze Tmy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>golden click ⋆ lofi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; }
-  body, html {
-    margin: 0; padding: 0; width: 100%; height: 100%;
-    background: #000; overflow: hidden;
-    font-family: 'Press Start 2P', 'Courier New', monospace; color: #e8e8e8;
-    user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+  :root{
+    --bg:#211a2e;
+    --bg2:#2a2140;
+    --panel:#332950;
+    --panel2:#3c3160;
+    --line:#4d3f73;
+    --text:#f3ecff;
+    --dim:#b6a8d9;
+    --peach:#f7b267;
+    --pink:#f4978e;
+    --teal:#9bd8c4;
+    --gold:#ffd66b;
+    --gold2:#fff2c8;
   }
-  #gameCanvas {
-    display: block; width: 100%; height: 100%;
-    image-rendering: pixelated; image-rendering: crisp-edges;
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Quicksand', sans-serif;
+    color:var(--text);
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 0%, #3a2c56 0%, transparent 45%),
+      radial-gradient(circle at 85% 15%, #3d2a4a 0%, transparent 40%),
+      linear-gradient(180deg, var(--bg2), var(--bg) 60%);
+    display:flex; flex-direction:column; align-items:center;
+    padding:26px 14px 70px;
+  }
+  .wrap{ width:100%; max-width:480px; }
+
+  .sky{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .dot{ position:absolute; width:3px; height:3px; background:var(--gold2); border-radius:50%; opacity:0.35; animation:drift 14s linear infinite; }
+  @keyframes drift{ 0%{ transform:translateY(0);} 100%{ transform:translateY(-120vh);} }
+
+  header{ text-align:center; margin-bottom:16px; position:relative; z-index:1; }
+  .tag{ font-size:11px; letter-spacing:3px; color:var(--dim); text-transform:uppercase; }
+  h1{
+    font-family:'Comfortaa', sans-serif;
+    font-size:28px; margin:6px 0 4px; font-weight:700;
+    background:linear-gradient(180deg, var(--gold2), var(--peach));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .sub{ font-size:12px; color:var(--dim); }
+
+  .music{
+    position:relative; z-index:1;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:12px 14px;
+    margin-bottom:16px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .music-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .music-title{ font-size:12px; color:var(--dim); letter-spacing:1px; display:flex; align-items:center; gap:6px;}
+  .music-title .note{ animation:bob 1.6s ease-in-out infinite; }
+  @keyframes bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-3px);} }
+  select, .yt-input{
+    background:var(--panel2); color:var(--text); border:1px solid var(--line);
+    border-radius:8px; padding:7px 9px; font-family:inherit; font-size:12px; outline:none;
+  }
+  select{ flex:1; }
+  #playerBox{ display:none; border-radius:10px; overflow:hidden; }
+  #playerBox iframe{ width:100%; height:150px; border:0; display:block; }
+  .music-toggle{
+    background:var(--peach); border:none; color:#2a2140; font-weight:700;
+    border-radius:8px; padding:7px 12px; font-family:inherit; font-size:12px; cursor:pointer;
+    white-space:nowrap;
+  }
+  .music-toggle:hover{ filter:brightness(1.08); }
+  .custom-row{ display:flex; gap:8px; }
+  .custom-row .yt-input{ flex:1; }
+  .custom-row button{
+    background:var(--panel2); border:1px solid var(--line); color:var(--teal);
+    border-radius:8px; padding:7px 12px; font-family:inherit; font-size:12px; cursor:pointer;
   }
 
-  /* ---- HUD ---- */
-  #hud {
-    position: absolute; top: 0; left: 0; right: 0;
-    display: flex; justify-content: space-between; align-items: flex-start;
-    padding: 14px 16px; z-index: 10; pointer-events: none;
+  .stage{
+    position:relative; z-index:1;
+    border:1px solid var(--line);
+    background:var(--panel);
+    border-radius:18px;
+    padding:26px 18px 22px;
+    text-align:center;
   }
-  .hud-box {
-    background: rgba(10,10,14,0.72);
-    border: 2px solid #3a3a3a;
-    padding: 8px 12px;
-    font-size: 11px;
-    line-height: 1.6;
-    letter-spacing: 1px;
-    box-shadow: 0 0 0 1px #000, 0 4px 0 rgba(0,0,0,0.4);
+  .stat-row{
+    display:flex; justify-content:space-around;
+    font-size:10px; color:var(--dim); letter-spacing:1px; margin-bottom:20px;
   }
-  #soulsBox { color: #f4e04d; }
-  #soulsBox .icon { color: #f4e04d; }
-  #healthWrap { width: 130px; }
-  #healthLabel { color: #c94f4f; font-size: 10px; margin-bottom: 4px; display:block; }
-  #healthBarOuter {
-    width: 100%; height: 12px; background: #1a1a1a; border: 2px solid #3a3a3a; position: relative;
-  }
-  #healthBarInner {
-    height: 100%; background: linear-gradient(#e05a5a,#a83232); transition: width 0.15s steps(6);
-    width: 100%;
-  }
+  .stat-row b{ color:var(--text); font-size:16px; display:block; margin-top:2px; font-family:'Comfortaa',sans-serif;}
 
-  #distBox { text-align: right; color: #7fb6ff; }
+  #clickBtn{
+    width:180px; height:180px; border-radius:50%;
+    border:none;
+    background:radial-gradient(circle at 35% 30%, #4d3f73, #2b2244 72%);
+    color:var(--text); font-family:'Comfortaa',sans-serif;
+    font-size:14px; font-weight:700; letter-spacing:0.5px;
+    cursor:pointer; box-shadow:0 8px 30px rgba(0,0,0,0.35), inset 0 0 26px rgba(255,255,255,0.03);
+    transition:transform 0.08s ease, box-shadow 0.25s ease;
+    user-select:none; -webkit-tap-highlight-color:transparent;
+  }
+  #clickBtn:active{ transform:scale(0.93); }
+  #clickBtn:hover{ box-shadow:0 8px 30px rgba(0,0,0,0.35), 0 0 26px rgba(247,178,103,0.35); }
+  #clickBtn .lbl{ display:block; font-size:15px; }
+  #clickBtn .sm{ display:block; font-size:10px; color:var(--dim); font-weight:500; margin-top:6px; letter-spacing:1px;}
 
-  /* ---- Center message ---- */
-  #message {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    text-align: center; display: none; z-index: 30; width: 90%; max-width: 460px;
-  }
-  #message h1 {
-    font-size: 28px; margin: 0 0 14px 0; letter-spacing: 2px;
-    text-shadow: 3px 3px 0 #000, 0 0 20px currentColor;
-    animation: msgPulse 1.6s ease-in-out infinite;
-  }
-  @keyframes msgPulse { 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.04);} }
-  #message p { font-size: 11px; color: #999; margin: 6px 0; line-height: 1.8; }
-  #retryBtn {
-    margin-top: 18px; display: inline-block; cursor: pointer;
-    background: #1a1a1a; border: 2px solid #666; color: #fff;
-    padding: 12px 22px; font-size: 12px; font-family: inherit;
-    letter-spacing: 1px;
-  }
-  #retryBtn:active { background: #333; border-color: #999; }
+  .odds{ margin-top:16px; font-size:10px; color:var(--dim); letter-spacing:0.5px; }
+  .odds b{ color:var(--gold); }
 
-  /* ---- Start overlay ---- */
-  #startOverlay {
-    position: absolute; inset: 0; background: #000; z-index: 40;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 20px;
+  #feed{ position:relative; margin-top:14px; min-height:20px; font-size:12px; font-weight:600;}
+  .drop{ animation:fadeUp 2.2s ease forwards; }
+  @keyframes fadeUp{
+    0%{opacity:0; transform:translateY(4px);}
+    10%{opacity:1; transform:translateY(0);}
+    80%{opacity:1;}
+    100%{opacity:0; transform:translateY(-6px);}
   }
-  #startOverlay h1 {
-    font-size: clamp(22px, 6vw, 38px); color: #c94f4f; letter-spacing: 3px;
-    text-shadow: 3px 3px 0 #000, 0 0 24px #6b1414;
-    margin-bottom: 10px;
-    animation: flicker 3s infinite;
-  }
-  @keyframes flicker {
-    0%, 19%, 21%, 23%, 80%, 100% { opacity: 1; }
-    20%, 22%, 81% { opacity: 0.55; }
-  }
-  #startOverlay .sub { color: #888; font-size: 10px; line-height: 2; max-width: 420px; margin-bottom: 24px; }
-  #startBtn {
-    background: #1a1a1a; border: 3px solid #c94f4f; color: #fff;
-    padding: 16px 34px; font-size: 14px; font-family: inherit; cursor: pointer;
-    letter-spacing: 2px; box-shadow: 0 0 20px rgba(201,79,79,0.4);
-  }
-  #startBtn:active { background: #c94f4f; }
-  #soundHint { margin-top: 14px; font-size: 9px; color: #555; }
+  .t-common{ color:var(--dim); }
+  .t-uncommon{ color:var(--teal); }
+  .t-rare{ color:#a7c7ff; }
+  .t-epic{ color:#d6a8ff; }
+  .t-gold{ color:var(--gold); text-shadow:0 0 12px rgba(255,214,107,0.6); }
 
-  /* ---- Mobile controls ---- */
-  #mobile-controls {
-    position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
-    display: grid; grid-template-columns: 62px 62px 62px; grid-template-rows: 62px 62px;
-    gap: 10px; z-index: 20;
+  #flash{
+    position:fixed; inset:0; pointer-events:none; z-index:50;
+    background:radial-gradient(circle at 50% 45%, rgba(255,214,107,0.3), transparent 60%);
+    opacity:0; transition:opacity 0.15s ease;
   }
-  .btn {
-    background: rgba(255,255,255,0.08); border: 2px solid #3a3a3a; color: #ccc;
-    font-size: 24px; border-radius: 10px; display: flex; justify-content: center; align-items: center;
-    backdrop-filter: blur(2px);
+  #flash.on{ opacity:1; }
+  #goldBanner{
+    position:fixed; top:18px; left:50%; transform:translate(-50%,-140%);
+    z-index:60; background:linear-gradient(180deg,#463a20,#2a230f);
+    border:1px solid var(--gold); color:var(--gold2); padding:12px 22px;
+    border-radius:12px; font-family:'Comfortaa',sans-serif; font-size:13px;
+    letter-spacing:1px; text-align:center; box-shadow:0 0 40px rgba(255,214,107,0.35);
+    transition:transform 0.45s cubic-bezier(.2,1.4,.4,1); white-space:nowrap;
   }
-  .btn:active { background: rgba(201,79,79,0.35); border-color: #c94f4f; }
-  #btn-up { grid-column: 2; grid-row: 1; }
-  #btn-left { grid-column: 1; grid-row: 2; }
-  #btn-down { grid-column: 2; grid-row: 2; }
-  #btn-right { grid-column: 3; grid-row: 2; }
+  #goldBanner.show{ transform:translate(-50%,0); }
 
-  @media (min-width: 768px) { #mobile-controls { display: none; } }
-
-  #vignette {
-    position: absolute; inset: 0; pointer-events: none; z-index: 5;
-    box-shadow: inset 0 0 140px 40px rgba(0,0,0,0.85);
+  #achToast{
+    position:fixed; bottom:22px; left:50%; transform:translate(-50%, 160%);
+    z-index:60; background:var(--panel2); border:1px solid var(--peach);
+    color:var(--text); padding:10px 16px; border-radius:12px;
+    font-size:12px; display:flex; align-items:center; gap:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+    transition:transform 0.4s cubic-bezier(.2,1.4,.4,1); max-width:90vw;
   }
+  #achToast.show{ transform:translate(-50%, 0); }
+  #achToast .ico{ font-size:18px; }
+  #achToast .txt b{ display:block; color:var(--gold); font-size:11px; letter-spacing:1px; }
+
+  .panel{
+    position:relative; z-index:1; margin-top:18px;
+    border:1px solid var(--line); background:var(--panel); border-radius:16px; overflow:hidden;
+  }
+  .panel h2{
+    font-family:'Comfortaa',sans-serif; font-size:12px; letter-spacing:2px; color:var(--dim);
+    margin:0; padding:14px 16px 10px; text-transform:uppercase; border-bottom:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .panel h2 span.count{ color:var(--peach); font-size:11px; }
+
+  .inv-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; padding:14px;
+  }
+  .inv-item{
+    background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+    padding:12px 6px; text-align:center; position:relative;
+    transition:transform 0.15s ease;
+  }
+  .inv-item.locked{ opacity:0.35; filter:grayscale(1); }
+  .inv-item .icon{ font-size:26px; display:block; margin-bottom:4px; }
+  .inv-item .name{ font-size:10px; color:var(--dim); letter-spacing:0.5px; text-transform:uppercase; }
+  .inv-item .qty{ font-size:14px; font-weight:700; font-family:'Comfortaa',sans-serif; margin-top:2px; }
+  .inv-item.gold-item{ border-color:var(--gold); box-shadow:0 0 16px rgba(255,214,107,0.15); }
+  .inv-item.gold-item .qty{ color:var(--gold); }
+
+  .ach-list{ padding:8px 14px 14px; display:flex; flex-direction:column; gap:8px; }
+  .ach-row{
+    display:flex; align-items:center; gap:10px; padding:9px 10px;
+    background:var(--panel2); border-radius:10px; border:1px solid var(--line);
+  }
+  .ach-row.locked{ opacity:0.4; }
+  .ach-row .ico{ font-size:18px; width:22px; text-align:center; }
+  .ach-row .name{ font-size:12px; font-weight:600; }
+  .ach-row .desc{ font-size:10px; color:var(--dim); }
+  .ach-row.unlocked{ border-color:var(--peach); }
+
+  footer{ margin-top:22px; text-align:center; font-size:10px; color:#7a6d9a; letter-spacing:0.5px; position:relative; z-index:1;}
 </style>
 </head>
 <body>
 
-<canvas id="gameCanvas"></canvas>
-<div id="vignette"></div>
+<div class="sky" id="sky"></div>
+<div id="flash"></div>
+<div id="goldBanner">◆ ✨ GOLDEN CLICK — RARE DROP ✨ ◆</div>
+<div id="achToast"><span class="ico">🏆</span><span class="txt"><b>ACHIEVEMENT UNLOCKED</b><span id="achToastText"></span></span></div>
 
-<div id="hud" style="display:none;">
-  <div class="hud-box" id="soulsBox"><span class="icon">◆</span> DUŠE <span id="score">0</span>/5</div>
-  <div class="hud-box" id="healthWrap">
-    <span id="healthLabel">STRACH</span>
-    <div id="healthBarOuter"><div id="healthBarInner"></div></div>
+<div class="wrap">
+  <header>
+    <div class="tag">// cozy case simulator</div>
+    <h1>golden click ⋆</h1>
+    <div class="sub">click for a surprise, keep what you find</div>
+  </header>
+
+  <div class="music">
+    <div class="music-top">
+      <div class="music-title"><span class="note">♪</span> lofi radio</div>
+      <button class="music-toggle" id="musicToggle">▶ play</button>
+    </div>
+    <select id="stationSelect">
+      <option value="E2vONfzoyRI">jazz lofi radio ☕</option>
+      <option value="1Tl2FtV06qo">asian lofi radio ⛩️</option>
+      <option value="DGBLvi795tc">lofi + rain 🌧️ study/chill</option>
+    </select>
+    <div class="custom-row">
+      <input class="yt-input" id="ytInput" placeholder="paste any YouTube link or video ID…">
+      <button id="ytLoad">load</button>
+    </div>
+    <div id="playerBox"><div id="ytPlayer"></div></div>
   </div>
-</div>
 
-<div id="message"></div>
+  <div class="stage">
+    <div class="stat-row">
+      <div>CLICKS<b id="clickCount">0</b></div>
+      <div>ITEMS FOUND<b id="itemCount">0</b></div>
+      <div>GOLD<b id="goldCount" style="color:var(--gold)">0</b></div>
+    </div>
 
-<div id="startOverlay">
-  <h1>ÚTĚK ZE TMY</h1>
-  <div class="sub">
-    Seber 5 duší roztroušených ve tmě.<br>
-    Něco tě sleduje. Tvá baterka je jediná ochrana —<br>
-    ale čím déle svítí na jednom místě, tím slaběji září.<br><br>
-    <b style="color:#aaa">WASD / šipky</b> — pohyb &nbsp;•&nbsp; mobil — tlačítka
+    <button id="clickBtn">
+      <span class="lbl">🎁 click for surprise</span>
+      <span class="sm">open case</span>
+    </button>
+
+    <div class="odds">gold drop chance: <b>0.10%</b> per click</div>
+    <div id="feed"></div>
   </div>
-  <div id="startBtn">▶ ZAČÍT</div>
-  <div id="soundHint">🔊 hraj se zapnutým zvukem</div>
-</div>
 
-<div id="mobile-controls">
-  <div class="btn" id="btn-up">⬆</div>
-  <div class="btn" id="btn-left">⬅</div>
-  <div class="btn" id="btn-down">⬇</div>
-  <div class="btn" id="btn-right">➡</div>
+  <div class="panel">
+    <h2>Inventory <span class="count" id="invTotal">0 items</span></h2>
+    <div class="inv-grid" id="invGrid"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Achievements <span class="count" id="achTotal">0/0</span></h2>
+    <div class="ach-list" id="achList"></div>
+  </div>
+
+  <footer>progress saves to this browser · sound on 🔊 · vibes only</footer>
 </div>
 
 <script>
 (function(){
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
-  const scoreEl = document.getElementById('score');
-  const messageEl = document.getElementById('message');
-  const hud = document.getElementById('hud');
-  const healthBarInner = document.getElementById('healthBarInner');
-  const startOverlay = document.getElementById('startOverlay');
-  const startBtn = document.getElementById('startBtn');
-
-  const PIXEL = 3; // logical pixel scale for that crunchy 8-bit look
-  let W, H, cols, rows;
-
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    W = canvas.width; H = canvas.height;
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  // ============ AUDIO ============
-  let audioCtx = null;
-  let masterGain = null;
-  let droneOsc = null, droneGain = null;
-  let heartbeatTimer = null;
-  let footstepToggle = 0;
-
-  function initAudio() {
-    if (audioCtx) return;
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0.5;
-    masterGain.connect(audioCtx.destination);
-
-    // ambient drone
-    droneOsc = audioCtx.createOscillator();
-    droneOsc.type = 'sine';
-    droneOsc.frequency.value = 45;
-    droneGain = audioCtx.createGain();
-    droneGain.gain.value = 0.05;
-    droneOsc.connect(droneGain).connect(masterGain);
-    droneOsc.start();
-
-    const droneOsc2 = audioCtx.createOscillator();
-    droneOsc2.type = 'sine';
-    droneOsc2.frequency.value = 67;
-    const droneGain2 = audioCtx.createGain();
-    droneGain2.gain.value = 0.025;
-    droneOsc2.connect(droneGain2).connect(masterGain);
-    droneOsc2.start();
+  const sky = document.getElementById('sky');
+  for (let i=0;i<26;i++){
+    const d = document.createElement('div');
+    d.className='dot';
+    d.style.left = Math.random()*100+'%';
+    d.style.top = (100+Math.random()*20)+'%';
+    d.style.animationDuration = (10+Math.random()*10)+'s';
+    d.style.animationDelay = (Math.random()*10)+'s';
+    d.style.opacity = 0.15+Math.random()*0.3;
+    sky.appendChild(d);
   }
 
-  function beep(freq, duration, type='sine', vol=0.15, glideTo=null) {
-    if (!audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    if (glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, audioCtx.currentTime + duration);
-    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-    osc.connect(gain).connect(masterGain);
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
+  let actx;
+  function ctx(){ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); return actx; }
+  function tone(freq, dur, type, gainMax, delay){
+    delay = delay||0;
+    const c = ctx();
+    const t0 = c.currentTime + delay;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = type||'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(gainMax||0.12, t0+0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0+dur);
+    osc.connect(gain); gain.connect(c.destination);
+    osc.start(t0); osc.stop(t0+dur+0.02);
   }
-
-  function playPickup() {
-    beep(520, 0.08, 'square', 0.12);
-    setTimeout(()=>beep(780, 0.12, 'square', 0.1), 70);
+  function sndClick(){ tone(320, 0.08, 'sine', 0.06); }
+  function sndNothing(){ tone(180, 0.12, 'sine', 0.04); }
+  function sndCommon(){ tone(440, 0.12, 'triangle', 0.08); }
+  function sndUncommon(){ tone(523, 0.1, 'triangle', 0.09); tone(659, 0.14, 'triangle', 0.08, 0.05); }
+  function sndRare(){ tone(659, 0.1, 'sine', 0.1); tone(880, 0.16, 'sine', 0.09, 0.06); }
+  function sndEpic(){ tone(587, 0.1, 'sawtooth', 0.06); tone(880, 0.12, 'sine', 0.09, 0.07); tone(1175, 0.18, 'sine', 0.08, 0.14); }
+  function sndGold(){
+    [523,659,784,1047,1319].forEach((f,i)=> tone(f, 0.25, 'sine', 0.11, i*0.08));
   }
+  function sndAch(){ tone(784,0.1,'triangle',0.08); tone(988,0.14,'triangle',0.08,0.09); }
 
-  function playFootstep() {
-    footstepToggle = 1 - footstepToggle;
-    beep(footstepToggle ? 90 : 78, 0.06, 'triangle', 0.05);
-  }
-
-  function playHeartbeat(intensity) {
-    if (!audioCtx) return;
-    beep(55, 0.09, 'sine', 0.18 * intensity);
-    setTimeout(()=>beep(50, 0.11, 'sine', 0.14 * intensity), 140);
-  }
-
-  function playJumpscare() {
-    if (!audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(8, audioCtx.currentTime + 1.6);
-    gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.6);
-    osc.connect(gain).connect(masterGain);
-    osc.start(); osc.stop(audioCtx.currentTime + 1.6);
-
-    // noise burst
-    const bufferSize = audioCtx.sampleRate * 0.4;
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i=0;i<bufferSize;i++) data[i] = (Math.random()*2-1) * (1 - i/bufferSize);
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = buffer;
-    const noiseGain = audioCtx.createGain();
-    noiseGain.gain.value = 0.5;
-    noise.connect(noiseGain).connect(masterGain);
-    noise.start();
-  }
-
-  function playWin() {
-    [0,1,2,3].forEach((n,i)=> setTimeout(()=>beep(440 * Math.pow(1.26, n), 0.22, 'square', 0.12), i*130));
-  }
-
-  // ============ GAME STATE ============
-  const player = { x: 0, y: 0, size: 11, speed: 3.6, facing: 0, animFrame: 0, animTimer: 0, moving:false };
-  const monster = { x: -200, y: -200, size: 15, speed: 1.5, animFrame:0, animTimer:0 };
-  let item = { x: 0, y: 0, size: 8, pulse: 0 };
-  let particles = [];
-  let dustMotes = [];
-
-  let score = 0;
-  let gameOver = false;
-  let gameStarted = false;
-  let keys = {};
-  let shakeAmount = 0;
-  let flashlightFlicker = 1;
-  let flashlightFatigue = 0; // grows if you stand still shining on one spot
-  let frameCount = 0;
-  let heartbeatInterval = null;
-
-  function resetGame() {
-    score = 0;
-    scoreEl.innerText = 0;
-    gameOver = false;
-    particles = [];
-    player.x = W/2; player.y = H/2;
-    player.speed = 3.6;
-    monster.speed = 1.35;
-    monster.x = Math.random() < 0.5 ? -100 : W + 100;
-    monster.y = Math.random() < 0.5 ? -100 : H + 100;
-    flashlightFatigue = 0;
-    healthBarInner.style.width = '100%';
-    spawnItem();
-    initDust();
-  }
-
-  function spawnItem() {
-    item.x = Math.random() * (W - 100) + 50;
-    item.y = Math.random() * (H - 100) + 50;
-  }
-
-  function initDust() {
-    dustMotes = [];
-    for (let i=0;i<40;i++) {
-      dustMotes.push({
-        x: Math.random()*W, y: Math.random()*H,
-        vx: (Math.random()-0.5)*0.15, vy: (Math.random()-0.5)*0.15,
-        size: Math.random()*1.5+0.5, alpha: Math.random()*0.3+0.1
-      });
-    }
-  }
-
-  // ============ INPUT ============
-  window.addEventListener('keydown', e => {
-    keys[e.key] = true;
-    if (!gameStarted) return;
-  });
-  window.addEventListener('keyup', e => { keys[e.key] = false; });
-
-  const bindBtn = (id, key) => {
-    const btn = document.getElementById(id);
-    btn.addEventListener('touchstart', e => { e.preventDefault(); keys[key] = true; }, {passive:false});
-    btn.addEventListener('touchend', e => { e.preventDefault(); keys[key] = false; }, {passive:false});
-    btn.addEventListener('mousedown', e => { keys[key] = true; });
-    btn.addEventListener('mouseup', e => { keys[key] = false; });
+  const SAVE_KEY = 'golden_click_save_v2';
+  let state = {
+    clicks:0, items:0, golds:0,
+    inv:{ common:0, uncommon:0, rare:0, epic:0, gold:0 },
+    ach:{}
   };
-  bindBtn('btn-up','ArrowUp'); bindBtn('btn-down','ArrowDown');
-  bindBtn('btn-left','ArrowLeft'); bindBtn('btn-right','ArrowRight');
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
+    if (s) state = Object.assign(state, s);
+  } catch(e){}
 
-  startBtn.addEventListener('click', startGame);
-  startBtn.addEventListener('touchstart', e => { e.preventDefault(); startGame(); }, {passive:false});
-
-  function startGame() {
-    initAudio();
-    startOverlay.style.display = 'none';
-    hud.style.display = 'flex';
-    gameStarted = true;
-    resetGame();
-    let stepAcc = 0;
-    heartbeatInterval = setInterval(() => {
-      if (gameOver || !gameStarted) return;
-      const dist = Math.hypot(player.x-monster.x, player.y-monster.y);
-      const danger = Math.max(0, 1 - dist/420);
-      if (danger > 0.08) playHeartbeat(danger);
-    }, 900);
-    loop();
+  function save(){
+    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){}
   }
 
-  // ============ PARTICLES ============
-  function spawnParticles(x, y, color, count, speedMul=1) {
-    for (let i=0;i<count;i++) {
-      const angle = Math.random()*Math.PI*2;
-      const speed = (Math.random()*2+1)*speedMul;
-      particles.push({
-        x, y, color,
-        vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed,
-        life: 1, decay: Math.random()*0.02+0.02,
-        size: Math.random()*3+2
-      });
-    }
+  const tiers = [
+    { key:'nothing',   name:'nothing',    icon:'💨', cls:'t-common',   chance:55,    snd:sndNothing },
+    { key:'common',    name:'pebble',     icon:'🪨', cls:'t-common',   chance:25,    snd:sndCommon },
+    { key:'uncommon',  name:'clover',     icon:'🍀', cls:'t-uncommon', chance:12,    snd:sndUncommon },
+    { key:'rare',      name:'gem',        icon:'💎', cls:'t-rare',     chance:6,     snd:sndRare },
+    { key:'epic',      name:'crown',      icon:'👑', cls:'t-epic',     chance:1.9,   snd:sndEpic },
+    { key:'gold',      name:'★ gold ★',   icon:'🌟', cls:'t-gold',     chance:0.10,  snd:sndGold },
+  ];
+
+  function rollTier(){
+    const r = Math.random()*100;
+    let acc=0;
+    for (const t of tiers){ acc+=t.chance; if (r<=acc) return t; }
+    return tiers[0];
   }
 
-  function updateParticles() {
-    particles = particles.filter(p => p.life > 0);
-    particles.forEach(p => {
-      p.x += p.vx; p.y += p.vy;
-      p.vx *= 0.96; p.vy *= 0.96;
-      p.life -= p.decay;
+  const achievements = [
+    { id:'first_click', icon:'👋', name:'First Steps', desc:'click once', check:s=>s.clicks>=1 },
+    { id:'c100',  icon:'🖱️', name:'Warming Up', desc:'100 clicks', check:s=>s.clicks>=100 },
+    { id:'c500', icon:'🔥', name:'Dedicated', desc:'500 clicks', check:s=>s.clicks>=500 },
+    { id:'c2000',icon:'🌙', name:'No Life (affectionate)', desc:'2000 clicks', check:s=>s.clicks>=2000 },
+    { id:'first_item', icon:'📦', name:'First Find', desc:'find your first item', check:s=>s.items>=1 },
+    { id:'coll25', icon:'🧺', name:'Collector', desc:'25 items found', check:s=>s.items>=25 },
+    { id:'coll100', icon:'🏺', name:'Hoarder', desc:'100 items found', check:s=>s.items>=100 },
+    { id:'first_rare', icon:'💎', name:'Rare Sighting', desc:'find a gem', check:s=>s.inv.rare>=1 },
+    { id:'first_epic', icon:'👑', name:'Epic Moment', desc:'find a crown', check:s=>s.inv.epic>=1 },
+    { id:'first_gold', icon:'🌟', name:'Golden', desc:'the rare 0.10% drop', check:s=>s.golds>=1 },
+    { id:'gold5', icon:'✨', name:'Golden Touch', desc:'5 golden clicks', check:s=>s.golds>=5 },
+    { id:'gold10', icon:'👑', name:'Certified Lucky', desc:'10 golden clicks', check:s=>s.golds>=10 },
+  ];
+
+  const clickBtn=document.getElementById('clickBtn');
+  const clickCountEl=document.getElementById('clickCount');
+  const itemCountEl=document.getElementById('itemCount');
+  const goldCountEl=document.getElementById('goldCount');
+  const feed=document.getElementById('feed');
+  const flash=document.getElementById('flash');
+  const banner=document.getElementById('goldBanner');
+  const achToast=document.getElementById('achToast');
+  const achToastText=document.getElementById('achToastText');
+
+  function popFeed(text, cls){
+    const d=document.createElement('div');
+    d.className='drop '+cls; d.textContent=text;
+    feed.innerHTML=''; feed.appendChild(d);
+  }
+  function goldMoment(){
+    flash.classList.add('on'); banner.classList.add('show');
+    setTimeout(()=>flash.classList.remove('on'),300);
+    setTimeout(()=>banner.classList.remove('show'),1800);
+  }
+  let toastQueue=[], toastBusy=false;
+  function queueAch(a){
+    toastQueue.push(a);
+    if(!toastBusy) drainToast();
+  }
+  function drainToast(){
+    if(!toastQueue.length){ toastBusy=false; return; }
+    toastBusy=true;
+    const a=toastQueue.shift();
+    achToastText.textContent = a.name + ' — ' + a.desc;
+    achToast.classList.add('show');
+    sndAch();
+    setTimeout(()=>{
+      achToast.classList.remove('show');
+      setTimeout(drainToast, 350);
+    }, 2200);
+  }
+
+  function checkAchievements(){
+    achievements.forEach(a=>{
+      if (!state.ach[a.id] && a.check(state)){
+        state.ach[a.id]=true;
+        queueAch(a);
+      }
     });
   }
 
-  // ============ UPDATE ============
-  function update() {
-    if (gameOver || !gameStarted) return;
-    frameCount++;
+  function renderInv(){
+    const grid=document.getElementById('invGrid');
+    grid.innerHTML = tiers.filter(t=>t.key!=='nothing').map(t=>{
+      const qty = state.inv[t.key]||0;
+      const locked = qty===0;
+      return `<div class="inv-item ${locked?'locked':''} ${t.key==='gold'?'gold-item':''}">
+        <span class="icon">${locked?'❔':t.icon}</span>
+        <div class="name">${t.name}</div>
+        <div class="qty">${qty}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('invTotal').textContent = state.items + ' items';
+  }
 
-    let dx=0, dy=0;
-    if (keys['ArrowUp']||keys['w']||keys['W']) dy -= 1;
-    if (keys['ArrowDown']||keys['s']||keys['S']) dy += 1;
-    if (keys['ArrowLeft']||keys['a']||keys['A']) dx -= 1;
-    if (keys['ArrowRight']||keys['d']||keys['D']) dx += 1;
+  function renderAch(){
+    const list=document.getElementById('achList');
+    list.innerHTML = achievements.map(a=>{
+      const unlocked = !!state.ach[a.id];
+      return `<div class="ach-row ${unlocked?'unlocked':'locked'}">
+        <div class="ico">${unlocked?a.icon:'🔒'}</div>
+        <div>
+          <div class="name">${a.name}</div>
+          <div class="desc">${a.desc}</div>
+        </div>
+      </div>`;
+    }).join('');
+    const unlockedCount = achievements.filter(a=>state.ach[a.id]).length;
+    document.getElementById('achTotal').textContent = unlockedCount+'/'+achievements.length;
+  }
 
-    player.moving = (dx!==0 || dy!==0);
-    if (player.moving) {
-      const len = Math.hypot(dx,dy) || 1;
-      player.x += (dx/len) * player.speed;
-      player.y += (dy/len) * player.speed;
-      if (dx !== 0) player.facing = dx > 0 ? 1 : -1;
+  function renderStats(){
+    clickCountEl.textContent = state.clicks.toLocaleString();
+    itemCountEl.textContent = state.items.toLocaleString();
+    goldCountEl.textContent = state.golds.toLocaleString();
+  }
 
-      player.animTimer++;
-      if (player.animTimer > 8) { player.animTimer = 0; player.animFrame = (player.animFrame+1)%4; }
+  clickBtn.addEventListener('click', () => {
+    state.clicks++;
+    sndClick();
+    const tier = rollTier();
 
-      if (frameCount % 18 === 0) playFootstep();
-
-      flashlightFatigue = Math.max(0, flashlightFatigue - 0.02);
+    if (tier.key!=='nothing'){
+      state.items++;
+      state.inv[tier.key] = (state.inv[tier.key]||0)+1;
+      if (tier.key==='gold'){
+        state.golds++;
+        popFeed('★ GOLDEN CLICK — added to inventory ★', tier.cls);
+        goldMoment();
+      } else {
+        popFeed('found: '+tier.name, tier.cls);
+      }
+      setTimeout(tier.snd, 0);
     } else {
-      flashlightFatigue = Math.min(1, flashlightFatigue + 0.006);
+      popFeed('nothing this time…', tier.cls);
+      setTimeout(tier.snd, 0);
     }
 
-    player.x = Math.max(player.size, Math.min(W - player.size, player.x));
-    player.y = Math.max(player.size, Math.min(H - player.size, player.y));
+    renderStats(); renderInv();
+    checkAchievements(); renderAch();
+    save();
+  });
 
-    // monster AI - chases with slight wobble for organic feel
-    let mdx = player.x - monster.x;
-    let mdy = player.y - monster.y;
-    const distToMonster = Math.hypot(mdx, mdy);
-    if (distToMonster > 0) {
-      const wobble = Math.sin(frameCount*0.05)*0.3;
-      monster.x += (mdx/distToMonster) * monster.speed + wobble;
-      monster.y += (mdy/distToMonster) * monster.speed;
+  renderStats(); renderInv(); renderAch();
+
+  const stationSelect=document.getElementById('stationSelect');
+  const musicToggle=document.getElementById('musicToggle');
+  const playerBox=document.getElementById('playerBox');
+  const ytPlayer=document.getElementById('ytPlayer');
+  const ytInput=document.getElementById('ytInput');
+  const ytLoad=document.getElementById('ytLoad');
+  let playing=false;
+
+  function extractId(val){
+    val = val.trim();
+    if (!val) return null;
+    let m = val.match(/[?&]v=([^&]+)/); if (m) return m[1];
+    m = val.match(/youtu\.be\/([^?&]+)/); if (m) return m[1];
+    m = val.match(/embed\/([^?&]+)/); if (m) return m[1];
+    if (/^[a-zA-Z0-9_-]{11}$/.test(val)) return val;
+    return null;
+  }
+  function loadVideo(id, autoplay){
+    ytPlayer.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=${autoplay?1:0}&loop=1&playlist=${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    playerBox.style.display='block';
+  }
+  musicToggle.addEventListener('click', ()=>{
+    if (!playing){
+      loadVideo(stationSelect.value, true);
+      musicToggle.textContent='⏸ playing';
+      playing=true;
+    } else {
+      playerBox.style.display='none';
+      ytPlayer.innerHTML='';
+      musicToggle.textContent='▶ play';
+      playing=false;
     }
-    monster.animTimer++;
-    if (monster.animTimer > 10) { monster.animTimer=0; monster.animFrame=(monster.animFrame+1)%2; }
-
-    // danger shake + health bar reflect closeness
-    const danger = Math.max(0, 1 - distToMonster/380);
-    shakeAmount = danger * 5;
-    healthBarInner.style.width = (100 - danger*100).toFixed(0) + '%';
-
-    // flicker: worse when fatigued (staying still) or monster close
-    flashlightFlicker = 1 - flashlightFatigue*0.5 - danger*0.15;
-    if (Math.random() < 0.02 + danger*0.05) flashlightFlicker *= 0.5;
-
-    // dust motes drift
-    dustMotes.forEach(m => {
-      m.x += m.vx; m.y += m.vy;
-      if (m.x<0) m.x=W; if (m.x>W) m.x=0;
-      if (m.y<0) m.y=H; if (m.y>H) m.y=0;
-    });
-
-    // item pulse + collect
-    item.pulse += 0.15;
-    const idx = player.x - item.x, idy = player.y - item.y;
-    if (Math.hypot(idx, idy) < player.size + item.size) {
-      score++;
-      scoreEl.innerText = score;
-      monster.speed += 0.32;
-      spawnParticles(item.x, item.y, '#f4e04d', 18, 2);
-      playPickup();
-      if (score >= 5) winGame(); else spawnItem();
-    }
-
-    // caught
-    if (distToMonster < player.size + monster.size - 4) {
-      spawnParticles(player.x, player.y, '#c94f4f', 30, 3);
-      loseGame();
-    }
-
-    updateParticles();
-  }
-
-  // ============ DRAW HELPERS (pixel sprites via rects) ============
-  function drawPixelSprite(px, py, pattern, colorMap, scale, flip) {
-    const rows = pattern.length;
-    const cols = pattern[0].length;
-    for (let r=0;r<rows;r++) {
-      for (let c=0;c<cols;c++) {
-        const ch = pattern[r][flip ? cols-1-c : c];
-        if (ch === '.' ) continue;
-        ctx.fillStyle = colorMap[ch];
-        ctx.fillRect(
-          Math.round(px + c*scale - (cols*scale)/2),
-          Math.round(py + r*scale - (rows*scale)/2),
-          scale, scale
-        );
-      }
-    }
-  }
-
-  // simple humanoid, 2-frame walk cycle
-  const playerFrames = [
-    [
-      "..WW..",
-      ".WWWW.",
-      ".WWWW.",
-      "..PP..",
-      ".P..P.",
-      "F....F"
-    ],
-    [
-      "..WW..",
-      ".WWWW.",
-      ".WWWW.",
-      "..PP..",
-      "..PP..",
-      "F....F"
-    ]
-  ];
-  const playerColors = { W: '#f2f2f2', P: '#cfcfcf', F: '#8a8a8a' };
-
-  // creature, 2-frame
-  const monsterFrames = [
-    [
-      "..MM..",
-      ".MEEM.",
-      "MMMMMM",
-      "MMMMMM",
-      ".M..M.",
-      "M....M"
-    ],
-    [
-      ".MMMM.",
-      ".MEEM.",
-      "MMMMMM",
-      "MMMMMM",
-      "M....M",
-      ".M..M."
-    ]
-  ];
-  const monsterColors = { M: '#6b0f0f', E: '#ffde59' };
-
-  function draw() {
-    ctx.save();
-    if (shakeAmount > 0.1) {
-      ctx.translate((Math.random()-0.5)*shakeAmount, (Math.random()-0.5)*shakeAmount);
-    }
-
-    ctx.fillStyle = '#050505';
-    ctx.fillRect(-20, -20, W+40, H+40);
-
-    if (!gameOver) {
-      // dust motes (subtle atmosphere, lit only near flashlight really but cheap glow ok)
-      dustMotes.forEach(m => {
-        const dm = Math.hypot(m.x-player.x, m.y-player.y);
-        if (dm < 170) {
-          ctx.fillStyle = `rgba(255,255,255,${m.alpha * (1-dm/170)})`;
-          ctx.fillRect(m.x, m.y, m.size, m.size);
-        }
-      });
-
-      // item (pulsing soul)
-      const pulseSize = item.size + Math.sin(item.pulse)*2;
-      ctx.save();
-      ctx.shadowColor = '#f4e04d';
-      ctx.shadowBlur = 18;
-      ctx.fillStyle = '#f4e04d';
-      ctx.beginPath();
-      ctx.arc(item.x, item.y, pulseSize, 0, Math.PI*2);
-      ctx.fill();
-      ctx.restore();
-      ctx.fillStyle = '#fff8c9';
-      ctx.fillRect(item.x-2, item.y-2, 4, 4);
-
-      // monster sprite
-      drawPixelSprite(monster.x, monster.y, monsterFrames[monster.animFrame], monsterColors, 4.2, false);
-
-      // particles
-      particles.forEach(p => {
-        ctx.globalAlpha = Math.max(0, p.life);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
-      });
-      ctx.globalAlpha = 1;
-
-      // player sprite
-      const frame = player.moving ? playerFrames[player.animFrame % 2] : playerFrames[0];
-      drawPixelSprite(player.x, player.y, frame, playerColors, 3.6, player.facing < 0);
-
-      // ---- FLASHLIGHT ----
-      const radius = 155 * flashlightFlicker;
-      const grad = ctx.createRadialGradient(player.x, player.y, 30*flashlightFlicker, player.x, player.y, radius);
-      grad.addColorStop(0, 'rgba(0,0,0,0)');
-      grad.addColorStop(0.6, 'rgba(0,0,0,0.55)');
-      grad.addColorStop(1, 'rgba(0,0,0,0.97)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(-20, -20, W+40, H+40);
-
-      // subtle warm tint near player like a real flashlight lens
-      const warm = ctx.createRadialGradient(player.x, player.y, 0, player.x, player.y, radius*0.5);
-      warm.addColorStop(0, `rgba(255,220,150,${0.06*flashlightFlicker})`);
-      warm.addColorStop(1, 'rgba(255,220,150,0)');
-      ctx.fillStyle = warm;
-      ctx.fillRect(-20,-20,W+40,H+40);
-    }
-
-    ctx.restore();
-  }
-
-  function loop() {
-    update();
-    draw();
-    if (!gameOver && gameStarted) requestAnimationFrame(loop);
-  }
-
-  function loseGame() {
-    gameOver = true;
-    playJumpscare();
-    clearInterval(heartbeatInterval);
-    let flashFrame = 0;
-    const flashInterval = setInterval(() => {
-      flashFrame++;
-      ctx.fillStyle = flashFrame % 2 === 0 ? '#8a0000' : '#1a0000';
-      ctx.fillRect(0,0,W,H);
-      if (flashFrame > 5) {
-        clearInterval(flashInterval);
-        showMessage('#c94f4f', 'NAŠLO TĚ TO', `Sebral jsi ${score} z 5 duší.`);
-      }
-    }, 90);
-    document.getElementById('mobile-controls').style.display = 'none';
-  }
-
-  function winGame() {
-    gameOver = true;
-    playWin();
-    clearInterval(heartbeatInterval);
-    ctx.fillStyle = '#001a08';
-    ctx.fillRect(0,0,W,H);
-    showMessage('#5be36a', 'PŘEŽIL JSI', 'Všech 5 duší je volných.');
-    document.getElementById('mobile-controls').style.display = 'none';
-  }
-
-  function showMessage(color, title, sub) {
-    messageEl.innerHTML = `
-      <h1 style="color:${color}">${title}</h1>
-      <p>${sub}</p>
-      <div id="retryBtn">▶ HRÁT ZNOVU</div>
-    `;
-    messageEl.style.display = 'block';
-    const retry = document.getElementById('retryBtn');
-    const restart = () => {
-      messageEl.style.display = 'none';
-      document.getElementById('mobile-controls').style.display = '';
-      resetGame();
-      loop();
-    };
-    retry.addEventListener('click', restart);
-    retry.addEventListener('touchstart', e => { e.preventDefault(); restart(); }, {passive:false});
-  }
-
+  });
+  stationSelect.addEventListener('change', ()=>{
+    if (playing) loadVideo(stationSelect.value, true);
+  });
+  ytLoad.addEventListener('click', ()=>{
+    const id = extractId(ytInput.value);
+    if (!id){ ytInput.placeholder="hmm, couldn't read that link — try again"; return; }
+    loadVideo(id, true);
+    musicToggle.textContent='⏸ playing';
+    playing=true;
+  });
 })();
 </script>
+
 </body>
 </html>
