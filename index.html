@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,31 +8,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#211a2e;
-    --bg2:#2a2140;
-    --panel:#332950;
-    --panel2:#3c3160;
-    --line:#4d3f73;
-    --text:#f3ecff;
-    --dim:#b6a8d9;
-    --peach:#f7b267;
-    --pink:#f4978e;
-    --teal:#9bd8c4;
-    --gold:#ffd66b;
-    --gold2:#fff2c8;
+    --bg:#211a2e; --bg2:#2a2140; --panel:#332950; --panel2:#3c3160; --line:#4d3f73;
+    --text:#f3ecff; --dim:#b6a8d9; --peach:#f7b267; --pink:#f4978e; --teal:#9bd8c4;
+    --gold:#ffd66b; --gold2:#fff2c8;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    font-family:'Quicksand', sans-serif;
-    color:var(--text);
-    min-height:100vh;
+    font-family:'Quicksand', sans-serif; color:var(--text); min-height:100vh;
     background:
       radial-gradient(circle at 20% 0%, #3a2c56 0%, transparent 45%),
       radial-gradient(circle at 85% 15%, #3d2a4a 0%, transparent 40%),
       linear-gradient(180deg, var(--bg2), var(--bg) 60%);
-    display:flex; flex-direction:column; align-items:center;
-    padding:26px 14px 70px;
+    display:flex; flex-direction:column; align-items:center; padding:26px 14px 70px;
   }
   .wrap{ width:100%; max-width:480px; }
 
@@ -40,24 +28,45 @@
   .dot{ position:absolute; width:3px; height:3px; background:var(--gold2); border-radius:50%; opacity:0.35; animation:drift 14s linear infinite; }
   @keyframes drift{ 0%{ transform:translateY(0);} 100%{ transform:translateY(-120vh);} }
 
-  header{ text-align:center; margin-bottom:16px; position:relative; z-index:1; }
+  .langbar{ position:relative; z-index:1; display:flex; justify-content:center; gap:6px; margin-bottom:10px; }
+  .langbar button{
+    background:var(--panel2); border:1px solid var(--line); color:var(--dim);
+    font-family:'Quicksand',sans-serif; font-size:11px; letter-spacing:1px;
+    padding:5px 12px; border-radius:999px; cursor:pointer; font-weight:600;
+  }
+  .langbar button.active{ background:var(--peach); color:#2a2140; border-color:var(--peach); }
+
+  header{ text-align:center; margin-bottom:14px; position:relative; z-index:1; }
   .tag{ font-size:11px; letter-spacing:3px; color:var(--dim); text-transform:uppercase; }
   h1{
-    font-family:'Comfortaa', sans-serif;
-    font-size:28px; margin:6px 0 4px; font-weight:700;
+    font-family:'Comfortaa', sans-serif; font-size:28px; margin:6px 0 4px; font-weight:700;
     background:linear-gradient(180deg, var(--gold2), var(--peach));
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
   .sub{ font-size:12px; color:var(--dim); }
 
+  .coinbar{
+    position:relative; z-index:1; display:flex; justify-content:center; align-items:center; gap:6px;
+    font-size:14px; font-family:'Comfortaa',sans-serif; color:var(--gold); margin-bottom:12px;
+  }
+
+  .worldbar{ position:relative; z-index:1; display:flex; gap:8px; margin-bottom:16px; }
+  .world-tile{
+    flex:1; background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:12px 6px; text-align:center; cursor:pointer; position:relative;
+    transition:transform .12s ease, border-color .15s ease;
+  }
+  .world-tile:active{ transform:scale(0.96); }
+  .world-tile.active{ border-color:var(--peach); box-shadow:0 0 16px rgba(247,178,103,0.25); }
+  .world-tile.locked{ opacity:0.5; cursor:not-allowed; }
+  .world-tile .wicon{ font-size:26px; display:block; margin-bottom:4px; }
+  .world-tile .wname{ font-size:11px; font-weight:700; font-family:'Comfortaa',sans-serif; }
+  .world-tile .wsub{ font-size:8.5px; color:var(--dim); margin-top:2px; line-height:1.3; }
+  .world-tile .lockIco{ position:absolute; top:6px; right:8px; font-size:11px; }
+
   .music{
-    position:relative; z-index:1;
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:16px;
-    padding:12px 14px;
-    margin-bottom:16px;
-    display:flex; flex-direction:column; gap:10px;
+    position:relative; z-index:1; background:var(--panel); border:1px solid var(--line);
+    border-radius:16px; padding:12px 14px; margin-bottom:16px; display:flex; flex-direction:column; gap:10px;
   }
   .music-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .music-title{ font-size:12px; color:var(--dim); letter-spacing:1px; display:flex; align-items:center; gap:6px;}
@@ -72,8 +81,7 @@
   #playerBox iframe{ width:100%; height:150px; border:0; display:block; }
   .music-toggle{
     background:var(--peach); border:none; color:#2a2140; font-weight:700;
-    border-radius:8px; padding:7px 12px; font-family:inherit; font-size:12px; cursor:pointer;
-    white-space:nowrap;
+    border-radius:8px; padding:7px 12px; font-family:inherit; font-size:12px; cursor:pointer; white-space:nowrap;
   }
   .music-toggle:hover{ filter:brightness(1.08); }
   .custom-row{ display:flex; gap:8px; }
@@ -84,28 +92,19 @@
   }
 
   .stage{
-    position:relative; z-index:1;
-    border:1px solid var(--line);
-    background:var(--panel);
-    border-radius:18px;
-    padding:26px 18px 22px;
-    text-align:center;
+    position:relative; z-index:1; border:1px solid var(--line); background:var(--panel);
+    border-radius:18px; padding:22px 18px 22px; text-align:center;
   }
-  .stat-row{
-    display:flex; justify-content:space-around;
-    font-size:10px; color:var(--dim); letter-spacing:1px; margin-bottom:20px;
-  }
+  .stageWorldName{ font-size:11px; color:var(--dim); letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
+  .stat-row{ display:flex; justify-content:space-around; font-size:10px; color:var(--dim); letter-spacing:1px; margin-bottom:20px; }
   .stat-row b{ color:var(--text); font-size:16px; display:block; margin-top:2px; font-family:'Comfortaa',sans-serif;}
 
   #clickBtn{
-    width:180px; height:180px; border-radius:50%;
-    border:none;
+    width:180px; height:180px; border-radius:50%; border:none;
     background:radial-gradient(circle at 35% 30%, #4d3f73, #2b2244 72%);
-    color:var(--text); font-family:'Comfortaa',sans-serif;
-    font-size:14px; font-weight:700; letter-spacing:0.5px;
+    color:var(--text); font-family:'Comfortaa',sans-serif; font-size:14px; font-weight:700; letter-spacing:0.5px;
     cursor:pointer; box-shadow:0 8px 30px rgba(0,0,0,0.35), inset 0 0 26px rgba(255,255,255,0.03);
-    transition:transform 0.08s ease, box-shadow 0.25s ease;
-    user-select:none; -webkit-tap-highlight-color:transparent;
+    transition:transform 0.08s ease, box-shadow 0.25s ease; user-select:none; -webkit-tap-highlight-color:transparent;
   }
   #clickBtn:active{ transform:scale(0.93); }
   #clickBtn:hover{ box-shadow:0 8px 30px rgba(0,0,0,0.35), 0 0 26px rgba(247,178,103,0.35); }
@@ -118,10 +117,8 @@
   #feed{ position:relative; margin-top:14px; min-height:20px; font-size:12px; font-weight:600;}
   .drop{ animation:fadeUp 2.2s ease forwards; }
   @keyframes fadeUp{
-    0%{opacity:0; transform:translateY(4px);}
-    10%{opacity:1; transform:translateY(0);}
-    80%{opacity:1;}
-    100%{opacity:0; transform:translateY(-6px);}
+    0%{opacity:0; transform:translateY(4px);} 10%{opacity:1; transform:translateY(0);}
+    80%{opacity:1;} 100%{opacity:0; transform:translateY(-6px);}
   }
   .t-common{ color:var(--dim); }
   .t-uncommon{ color:var(--teal); }
@@ -136,49 +133,43 @@
   }
   #flash.on{ opacity:1; }
   #goldBanner{
-    position:fixed; top:18px; left:50%; transform:translate(-50%,-140%);
-    z-index:60; background:linear-gradient(180deg,#463a20,#2a230f);
-    border:1px solid var(--gold); color:var(--gold2); padding:12px 22px;
-    border-radius:12px; font-family:'Comfortaa',sans-serif; font-size:13px;
+    position:fixed; top:18px; left:50%; transform:translate(-50%,-140%); z-index:60;
+    background:linear-gradient(180deg,#463a20,#2a230f); border:1px solid var(--gold); color:var(--gold2);
+    padding:12px 22px; border-radius:12px; font-family:'Comfortaa',sans-serif; font-size:13px;
     letter-spacing:1px; text-align:center; box-shadow:0 0 40px rgba(255,214,107,0.35);
     transition:transform 0.45s cubic-bezier(.2,1.4,.4,1); white-space:nowrap;
   }
   #goldBanner.show{ transform:translate(-50%,0); }
 
   #achToast{
-    position:fixed; bottom:22px; left:50%; transform:translate(-50%, 160%);
-    z-index:60; background:var(--panel2); border:1px solid var(--peach);
-    color:var(--text); padding:10px 16px; border-radius:12px;
-    font-size:12px; display:flex; align-items:center; gap:8px;
-    box-shadow:0 8px 24px rgba(0,0,0,0.4);
-    transition:transform 0.4s cubic-bezier(.2,1.4,.4,1); max-width:90vw;
+    position:fixed; bottom:22px; left:50%; transform:translate(-50%, 160%); z-index:60;
+    background:var(--panel2); border:1px solid var(--peach); color:var(--text); padding:10px 16px;
+    border-radius:12px; font-size:12px; display:flex; align-items:center; gap:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4); transition:transform 0.4s cubic-bezier(.2,1.4,.4,1); max-width:90vw;
   }
   #achToast.show{ transform:translate(-50%, 0); }
   #achToast .ico{ font-size:18px; }
   #achToast .txt b{ display:block; color:var(--gold); font-size:11px; letter-spacing:1px; }
 
   .panel{
-    position:relative; z-index:1; margin-top:18px;
-    border:1px solid var(--line); background:var(--panel); border-radius:16px; overflow:hidden;
+    position:relative; z-index:1; margin-top:18px; border:1px solid var(--line);
+    background:var(--panel); border-radius:16px; overflow:hidden;
   }
   .panel h2{
     font-family:'Comfortaa',sans-serif; font-size:12px; letter-spacing:2px; color:var(--dim);
     margin:0; padding:14px 16px 10px; text-transform:uppercase; border-bottom:1px solid var(--line);
     display:flex; justify-content:space-between; align-items:center;
   }
-  .panel h2 span.count{ color:var(--peach); font-size:11px; }
+  .panel h2 span.count{ color:var(--peach); font-size:11px; text-transform:none; letter-spacing:0; }
 
-  .inv-grid{
-    display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; padding:14px;
-  }
+  .inv-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; padding:14px; }
   .inv-item{
     background:var(--panel2); border:1px solid var(--line); border-radius:12px;
-    padding:12px 6px; text-align:center; position:relative;
-    transition:transform 0.15s ease;
+    padding:12px 6px; text-align:center; position:relative; transition:transform 0.15s ease;
   }
   .inv-item.locked{ opacity:0.35; filter:grayscale(1); }
-  .inv-item .icon{ font-size:26px; display:block; margin-bottom:4px; }
-  .inv-item .name{ font-size:10px; color:var(--dim); letter-spacing:0.5px; text-transform:uppercase; }
+  .inv-item .icon{ font-size:24px; display:block; margin-bottom:4px; }
+  .inv-item .name{ font-size:9.5px; color:var(--dim); letter-spacing:0.3px; text-transform:uppercase; }
   .inv-item .qty{ font-size:14px; font-weight:700; font-family:'Comfortaa',sans-serif; margin-top:2px; }
   .inv-item.gold-item{ border-color:var(--gold); box-shadow:0 0 16px rgba(255,214,107,0.15); }
   .inv-item.gold-item .qty{ color:var(--gold); }
@@ -194,6 +185,22 @@
   .ach-row .desc{ font-size:10px; color:var(--dim); }
   .ach-row.unlocked{ border-color:var(--peach); }
 
+  .upg-list{ padding:8px 14px 14px; display:flex; flex-direction:column; gap:8px; }
+  .upg-row{
+    display:flex; align-items:center; gap:10px; padding:10px;
+    background:var(--panel2); border:1px solid var(--line); border-radius:10px;
+  }
+  .upg-row.owned{ border-color:var(--teal); }
+  .upg-row .uico{ font-size:20px; width:26px; text-align:center; }
+  .upg-row .uinfo{ flex:1; min-width:0; }
+  .upg-row .uname{ font-size:12px; font-weight:700; }
+  .upg-row .udesc{ font-size:10px; color:var(--dim); }
+  .upg-row button{
+    background:var(--peach); border:none; color:#2a2140; font-weight:700; border-radius:8px;
+    padding:7px 10px; font-size:11px; cursor:pointer; font-family:inherit; white-space:nowrap;
+  }
+  .upg-row button:disabled{ background:var(--line); color:var(--dim); cursor:not-allowed; }
+
   footer{ margin-top:22px; text-align:center; font-size:10px; color:#7a6d9a; letter-spacing:0.5px; position:relative; z-index:1;}
 </style>
 </head>
@@ -201,60 +208,75 @@
 
 <div class="sky" id="sky"></div>
 <div id="flash"></div>
-<div id="goldBanner">◆ ✨ GOLDEN CLICK — RARE DROP ✨ ◆</div>
-<div id="achToast"><span class="ico">🏆</span><span class="txt"><b>ACHIEVEMENT UNLOCKED</b><span id="achToastText"></span></span></div>
+<div id="goldBanner"></div>
+<div id="achToast"><span class="ico">🏆</span><span class="txt"><b id="achToastTitle"></b><span id="achToastText"></span></span></div>
 
 <div class="wrap">
+  <div class="langbar">
+    <button id="langEN" class="active" data-lang="en">EN</button>
+    <button id="langCZ" data-lang="cz">CZ</button>
+  </div>
+
   <header>
-    <div class="tag">// cozy case simulator</div>
-    <h1>golden click ⋆</h1>
-    <div class="sub">click for a surprise, keep what you find</div>
+    <div class="tag" id="txtTag"></div>
+    <h1 id="txtTitle"></h1>
+    <div class="sub" id="txtSub"></div>
   </header>
+
+  <div class="coinbar">🪙 <span id="coinAmount">0</span> <span id="txtCoinsLabel"></span></div>
+
+  <div class="worldbar" id="worldBar"></div>
 
   <div class="music">
     <div class="music-top">
-      <div class="music-title"><span class="note">♪</span> lofi radio</div>
-      <button class="music-toggle" id="musicToggle">▶ play</button>
+      <div class="music-title"><span class="note">♪</span> <span id="txtMusicTitle"></span></div>
+      <button class="music-toggle" id="musicToggle"></button>
     </div>
     <select id="stationSelect">
       <option value="E2vONfzoyRI">jazz lofi radio ☕</option>
       <option value="1Tl2FtV06qo">asian lofi radio ⛩️</option>
-      <option value="DGBLvi795tc">lofi + rain 🌧️ study/chill</option>
+      <option value="DGBLvi795tc">lofi + rain 🌧️</option>
     </select>
     <div class="custom-row">
-      <input class="yt-input" id="ytInput" placeholder="paste any YouTube link or video ID…">
-      <button id="ytLoad">load</button>
+      <input class="yt-input" id="ytInput">
+      <button id="ytLoad"></button>
     </div>
     <div id="playerBox"><div id="ytPlayer"></div></div>
   </div>
 
   <div class="stage">
+    <div class="stageWorldName" id="stageWorldName"></div>
     <div class="stat-row">
-      <div>CLICKS<b id="clickCount">0</b></div>
-      <div>ITEMS FOUND<b id="itemCount">0</b></div>
-      <div>GOLD<b id="goldCount" style="color:var(--gold)">0</b></div>
+      <div><span id="txtStatClicks"></span><b id="clickCount">0</b></div>
+      <div><span id="txtStatItems"></span><b id="itemCount">0</b></div>
+      <div><span id="txtStatGold"></span><b id="goldCount" style="color:var(--gold)">0</b></div>
     </div>
 
     <button id="clickBtn">
-      <span class="lbl">🎁 click for surprise</span>
-      <span class="sm">open case</span>
+      <span class="lbl" id="txtClickLbl"></span>
+      <span class="sm" id="txtClickSm"></span>
     </button>
 
-    <div class="odds">gold drop chance: <b>0.10%</b> per click</div>
+    <div class="odds" id="txtOdds"></div>
     <div id="feed"></div>
   </div>
 
   <div class="panel">
-    <h2>Inventory <span class="count" id="invTotal">0 items</span></h2>
+    <h2><span id="txtUpgHeader"></span></h2>
+    <div class="upg-list" id="upgList"></div>
+  </div>
+
+  <div class="panel">
+    <h2><span id="txtInvHeader"></span> <span class="count" id="invTotal"></span></h2>
     <div class="inv-grid" id="invGrid"></div>
   </div>
 
   <div class="panel">
-    <h2>Achievements <span class="count" id="achTotal">0/0</span></h2>
+    <h2><span id="txtAchHeader"></span> <span class="count" id="achTotal"></span></h2>
     <div class="ach-list" id="achList"></div>
   </div>
 
-  <footer>progress saves to this browser · sound on 🔊 · vibes only</footer>
+  <footer id="txtFooter"></footer>
 </div>
 
 <script>
@@ -271,6 +293,7 @@
     sky.appendChild(d);
   }
 
+  /* ---------- audio ---------- */
   let actx;
   function ctx(){ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); return actx; }
   function tone(freq, dur, type, gainMax, delay){
@@ -293,66 +316,191 @@
   function sndUncommon(){ tone(523, 0.1, 'triangle', 0.09); tone(659, 0.14, 'triangle', 0.08, 0.05); }
   function sndRare(){ tone(659, 0.1, 'sine', 0.1); tone(880, 0.16, 'sine', 0.09, 0.06); }
   function sndEpic(){ tone(587, 0.1, 'sawtooth', 0.06); tone(880, 0.12, 'sine', 0.09, 0.07); tone(1175, 0.18, 'sine', 0.08, 0.14); }
-  function sndGold(){
-    [523,659,784,1047,1319].forEach((f,i)=> tone(f, 0.25, 'sine', 0.11, i*0.08));
-  }
+  function sndGold(){ [523,659,784,1047,1319].forEach((f,i)=> tone(f, 0.25, 'sine', 0.11, i*0.08)); }
   function sndAch(){ tone(784,0.1,'triangle',0.08); tone(988,0.14,'triangle',0.08,0.09); }
+  function sndBuy(){ tone(440,0.08,'square',0.05); tone(660,0.12,'square',0.05,0.06); }
+  function sndCoin(){ tone(988,0.06,'square',0.03); }
 
-  const SAVE_KEY = 'golden_click_save_v2';
+  /* ---------- world data (chances shared across worlds, items reskinned) ---------- */
+  const CHANCE_MAP = { nothing:40, a:20, b:15, c:10, d:6, e:4, f:2.5, g:1.5, h:0.9, gold:0.10 };
+  const CLS_MAP = { nothing:'t-common', a:'t-common', b:'t-common', c:'t-uncommon', d:'t-uncommon', e:'t-rare', f:'t-rare', g:'t-epic', h:'t-epic', gold:'t-gold' };
+  const COIN_VALUE = { 't-common':1, 't-uncommon':3, 't-rare':8, 't-epic':20, 't-gold':100 };
+
+  const WORLDS = {
+    forest:{ icon:'🌲', unlockAt:0,
+      slots:{ a:{key:'leaf',icon:'🍂'}, b:{key:'pebble',icon:'🪨'}, c:{key:'seashell',icon:'🐚'}, d:{key:'clover',icon:'🍀'},
+               e:{key:'orb',icon:'🔮'}, f:{key:'gem',icon:'💎'}, g:{key:'butterfly',icon:'🦋'}, h:{key:'crown',icon:'👑'}, gold:{key:'gold',icon:'🌟'} } },
+    ocean:{ icon:'🌊', unlockAt:30,
+      slots:{ a:{key:'bubble',icon:'🫧'}, b:{key:'shell',icon:'🐚'}, c:{key:'starfish',icon:'⭐'}, d:{key:'seahorse',icon:'🐠'},
+               e:{key:'jellyfish',icon:'🪼'}, f:{key:'pearl',icon:'🦪'}, g:{key:'trident',icon:'🔱'}, h:{key:'tear',icon:'💧'}, gold:{key:'goldcoin',icon:'🌟'} } },
+    space:{ icon:'🌌', unlockAt:80,
+      slots:{ a:{key:'stardust',icon:'✨'}, b:{key:'moonrock',icon:'🌑'}, c:{key:'comet',icon:'☄️'}, d:{key:'satellite',icon:'🛰️'},
+               e:{key:'nebula',icon:'🌌'}, f:{key:'meteor',icon:'🪨'}, g:{key:'alienegg',icon:'🥚'}, h:{key:'ufo',icon:'🛸'}, gold:{key:'goldstar',icon:'🌟'} } },
+  };
+  const WORLD_ORDER = ['forest','ocean','space'];
+
+  /* ---------- i18n ---------- */
+  const I18N = {
+    en:{
+      tag:'// cozy case simulator', title:'golden click ⋆', sub:'click for a surprise, keep what you find',
+      musicTitle:'lofi radio', play:'▶ play', pause:'⏸ playing',
+      ytPlaceholder:'paste any YouTube link or video ID…', ytLoad:'load',
+      ytError:"hmm, couldn't read that link — try again",
+      clickLbl:'🎁 click for surprise', clickSm:'open case',
+      odds:'gold drop chance: <b>{gold}%</b> per click',
+      statClicks:'CLICKS', statItems:'ITEMS FOUND', statGold:'GOLD',
+      invHeader:'Inventory', invCount:n=>n+' items',
+      achHeader:'Achievements', achToastTitle:'ACHIEVEMENT UNLOCKED',
+      upgHeader:'Upgrades', coinsLabel:'coins', buy:'buy', owned:'owned',
+      footer:'progress saves to this browser · sound on 🔊 · vibes only',
+      goldBanner:'◆ ✨ GOLDEN CLICK — RARE DROP ✨ ◆',
+      foundPrefix:'found: ', nothingMsg:'nothing this time…',
+      goldMsg:'★ GOLDEN CLICK — added to inventory ★',
+      unlockAt:n=>'unlocks at '+n+' items found',
+      worldNames:{ forest:'Forest', ocean:'Ocean', space:'Space' },
+      worldItems:{
+        forest:{ leaf:'leaf', pebble:'pebble', seashell:'seashell', clover:'clover', orb:'orb', gem:'gem', butterfly:'butterfly', crown:'crown', gold:'★ gold ★' },
+        ocean:{ bubble:'bubble', shell:'shell', starfish:'starfish', seahorse:'seahorse', jellyfish:'jellyfish', pearl:'pearl', trident:'trident', tear:'mermaid tear', goldcoin:'★ gold coin ★' },
+        space:{ stardust:'stardust', moonrock:'moon rock', comet:'comet', satellite:'satellite', nebula:'nebula', meteor:'meteor', alienegg:'alien egg', ufo:'UFO', goldstar:'★ golden star ★' },
+      },
+      upgrades:{
+        auto1:['Auto-Clicker','clicks for you every 5s'],
+        auto2:['Faster Auto-Clicker','upgrades to clicking every 2s'],
+        lucky1:['Lucky Charm','+0.05% gold chance'],
+        lucky2:['Golden Horseshoe','+0.10% more gold chance'],
+      },
+      ach:{
+        first_click:['First Steps','click once'], c100:['Warming Up','100 clicks'], c500:['Dedicated','500 clicks'],
+        c2000:['No Life (affectionate)','2000 clicks'], first_item:['First Find','find your first item'],
+        coll25:['Collector','25 items found'], coll100:['Hoarder','100 items found'],
+        first_rare:['Rare Sighting','find a rare item'], first_epic:['Epic Moment','find an epic item'],
+        first_gold:['Golden','the rare 0.10% drop'], gold5:['Golden Touch','5 golden clicks'], gold10:['Certified Lucky','10 golden clicks'],
+        unlock_ocean:['Set Sail','unlock the Ocean world'], unlock_space:['Lift Off','unlock the Space world'],
+        first_upgrade:['Upgraded','buy your first upgrade'], all_upgrades:['Fully Loaded','own every upgrade'],
+        autopilot100:['On Autopilot','100 auto-clicks'], triple_gold:['Triple Threat','find gold in all 3 worlds'],
+      }
+    },
+    cz:{
+      tag:'// útulný case simulátor', title:'zlatý klik ⋆', sub:'klikni pro překvapení a nech si, co najdeš',
+      musicTitle:'lofi rádio', play:'▶ přehrát', pause:'⏸ hraje',
+      ytPlaceholder:'vlož jakýkoliv YouTube odkaz nebo ID videa…', ytLoad:'načíst',
+      ytError:'hmm, tenhle odkaz nejde přečíst — zkus to znovu',
+      clickLbl:'🎁 klikni pro překvapení', clickSm:'otevřít balíček',
+      odds:'šance na zlatý úlovek: <b>{gold}%</b> na klik',
+      statClicks:'KLIKŮ', statItems:'NALEZENO', statGold:'ZLATO',
+      invHeader:'Inventář', invCount:n=>n+' předmětů',
+      achHeader:'Úspěchy', achToastTitle:'ÚSPĚCH ODEMČEN',
+      upgHeader:'Vylepšení', coinsLabel:'mincí', buy:'koupit', owned:'vlastníš',
+      footer:'postup se ukládá v tomto prohlížeči · zvuk zapnut 🔊 · jen pohoda',
+      goldBanner:'◆ ✨ ZLATÝ KLIK — VZÁCNÝ ÚLOVEK ✨ ◆',
+      foundPrefix:'nalezeno: ', nothingMsg:'tentokrát nic…',
+      goldMsg:'★ ZLATÝ KLIK — přidáno do inventáře ★',
+      unlockAt:n=>'odemkne se při '+n+' nalezených předmětech',
+      worldNames:{ forest:'Les', ocean:'Oceán', space:'Vesmír' },
+      worldItems:{
+        forest:{ leaf:'lístek', pebble:'oblázek', seashell:'mušlička', clover:'jetel', orb:'koule', gem:'drahokam', butterfly:'motýl', crown:'koruna', gold:'★ zlato ★' },
+        ocean:{ bubble:'bublina', shell:'lastura', starfish:'hvězdice', seahorse:'mořský koník', jellyfish:'medúza', pearl:'perla', trident:'trojzubec', tear:'slza mořské panny', goldcoin:'★ zlatá mince ★' },
+        space:{ stardust:'hvězdný prach', moonrock:'měsíční kámen', comet:'kometa', satellite:'satelit', nebula:'mlhovina', meteor:'meteor', alienegg:'vejce mimozemšťana', ufo:'UFO', goldstar:'★ zlatá hvězda ★' },
+      },
+      upgrades:{
+        auto1:['Automatický klikač','klikne za tebe každých 5 s'],
+        auto2:['Rychlejší auto-klikač','vylepšení na klikání každé 2 s'],
+        lucky1:['Šťastný amulet','+0,05 % šance na zlato'],
+        lucky2:['Zlatá podkova','+0,10 % šance na zlato navíc'],
+      },
+      ach:{
+        first_click:['První krok','klikni jednou'], c100:['Rozehřátí','100 kliků'], c500:['Odhodlaný','500 kliků'],
+        c2000:['Žádný život (s láskou)','2000 kliků'], first_item:['První nález','najdi svůj první předmět'],
+        coll25:['Sběratel','25 nalezených předmětů'], coll100:['Hromadič','100 nalezených předmětů'],
+        first_rare:['Vzácné zahlédnutí','najdi vzácný předmět'], first_epic:['Epický moment','najdi epický předmět'],
+        first_gold:['Zlatý','vzácný úlovek s šancí 0,10 %'], gold5:['Zlatý dotek','5 zlatých kliků'], gold10:['Ověřené štěstí','10 zlatých kliků'],
+        unlock_ocean:['Vyplouváme','odemkni svět Oceán'], unlock_space:['Start!','odemkni svět Vesmír'],
+        first_upgrade:['Vylepšeno','kup svoje první vylepšení'], all_upgrades:['Naplno vybaven','vlastni všechna vylepšení'],
+        autopilot100:['Na autopilota','100 automatických kliků'], triple_gold:['Trojitá hrozba','najdi zlato ve všech 3 světech'],
+      }
+    }
+  };
+
+  let lang = 'en';
+  try{ const l = localStorage.getItem('golden_click_lang'); if (l==='en'||l==='cz') lang=l; }catch(e){}
+  function t(){ return I18N[lang]; }
+
+  /* ---------- state ---------- */
+  const SAVE_KEY = 'golden_click_save_v4';
   let state = {
-    clicks:0, items:0, golds:0,
-    inv:{ common:0, uncommon:0, rare:0, epic:0, gold:0 },
+    clicks:0, items:0, golds:0, autoClicks:0,
+    coins:0, totalCoins:0,
+    counts:{ 't-common':0, 't-uncommon':0, 't-rare':0, 't-epic':0, 't-gold':0 },
+    world:'forest',
+    worlds:{ forest:{}, ocean:{}, space:{} },
+    upg:{ auto1:false, auto2:false, lucky1:false, lucky2:false },
     ach:{}
   };
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
     if (s) state = Object.assign(state, s);
   } catch(e){}
+  function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){} }
 
-  function save(){
-    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){}
-  }
+  function luckyBonus(){ return (state.upg.lucky1?0.05:0) + (state.upg.lucky2?0.10:0); }
 
-  const tiers = [
-    { key:'nothing',   name:'nothing',    icon:'💨', cls:'t-common',   chance:55,    snd:sndNothing },
-    { key:'common',    name:'pebble',     icon:'🪨', cls:'t-common',   chance:25,    snd:sndCommon },
-    { key:'uncommon',  name:'clover',     icon:'🍀', cls:'t-uncommon', chance:12,    snd:sndUncommon },
-    { key:'rare',      name:'gem',        icon:'💎', cls:'t-rare',     chance:6,     snd:sndRare },
-    { key:'epic',      name:'crown',      icon:'👑', cls:'t-epic',     chance:1.9,   snd:sndEpic },
-    { key:'gold',      name:'★ gold ★',   icon:'🌟', cls:'t-gold',     chance:0.10,  snd:sndGold },
-  ];
-
-  function rollTier(){
+  function rollTier(worldId){
+    const bonus = luckyBonus();
+    const slotOrder = ['nothing','a','b','c','d','e','f','g','h','gold'];
+    let nothingChance = CHANCE_MAP.nothing - bonus;
+    if (nothingChance < 5) nothingChance = 5;
+    const goldChance = CHANCE_MAP.gold + bonus;
     const r = Math.random()*100;
-    let acc=0;
-    for (const t of tiers){ acc+=t.chance; if (r<=acc) return t; }
-    return tiers[0];
+    let acc = 0;
+    for (const slot of slotOrder){
+      const chance = slot==='nothing' ? nothingChance : (slot==='gold' ? goldChance : CHANCE_MAP[slot]);
+      acc += chance;
+      if (r <= acc){
+        if (slot==='nothing') return { slot, key:'nothing', icon:'💨', cls:'t-common' };
+        const def = WORLDS[worldId].slots[slot];
+        return { slot, key:def.key, icon:def.icon, cls:CLS_MAP[slot] };
+      }
+    }
+    return { slot:'nothing', key:'nothing', icon:'💨', cls:'t-common' };
   }
 
-  const achievements = [
-    { id:'first_click', icon:'👋', name:'First Steps', desc:'click once', check:s=>s.clicks>=1 },
-    { id:'c100',  icon:'🖱️', name:'Warming Up', desc:'100 clicks', check:s=>s.clicks>=100 },
-    { id:'c500', icon:'🔥', name:'Dedicated', desc:'500 clicks', check:s=>s.clicks>=500 },
-    { id:'c2000',icon:'🌙', name:'No Life (affectionate)', desc:'2000 clicks', check:s=>s.clicks>=2000 },
-    { id:'first_item', icon:'📦', name:'First Find', desc:'find your first item', check:s=>s.items>=1 },
-    { id:'coll25', icon:'🧺', name:'Collector', desc:'25 items found', check:s=>s.items>=25 },
-    { id:'coll100', icon:'🏺', name:'Hoarder', desc:'100 items found', check:s=>s.items>=100 },
-    { id:'first_rare', icon:'💎', name:'Rare Sighting', desc:'find a gem', check:s=>s.inv.rare>=1 },
-    { id:'first_epic', icon:'👑', name:'Epic Moment', desc:'find a crown', check:s=>s.inv.epic>=1 },
-    { id:'first_gold', icon:'🌟', name:'Golden', desc:'the rare 0.10% drop', check:s=>s.golds>=1 },
-    { id:'gold5', icon:'✨', name:'Golden Touch', desc:'5 golden clicks', check:s=>s.golds>=5 },
-    { id:'gold10', icon:'👑', name:'Certified Lucky', desc:'10 golden clicks', check:s=>s.golds>=10 },
+  const achDefs = ['first_click','c100','c500','c2000','first_item','coll25','coll100','first_rare','first_epic',
+                    'first_gold','gold5','gold10','unlock_ocean','unlock_space','first_upgrade','all_upgrades','autopilot100','triple_gold'];
+  const achChecks = {
+    first_click:s=>s.clicks>=1, c100:s=>s.clicks>=100, c500:s=>s.clicks>=500, c2000:s=>s.clicks>=2000,
+    first_item:s=>s.items>=1, coll25:s=>s.items>=25, coll100:s=>s.items>=100,
+    first_rare:s=>s.counts['t-rare']>=1, first_epic:s=>s.counts['t-epic']>=1,
+    first_gold:s=>s.golds>=1, gold5:s=>s.golds>=5, gold10:s=>s.golds>=10,
+    unlock_ocean:s=>s.items>=WORLDS.ocean.unlockAt, unlock_space:s=>s.items>=WORLDS.space.unlockAt,
+    first_upgrade:s=>Object.values(s.upg).some(v=>v), all_upgrades:s=>Object.values(s.upg).every(v=>v),
+    autopilot100:s=>s.autoClicks>=100,
+    triple_gold:s=>(s.worlds.forest.gold||0)>=1 && (s.worlds.ocean.goldcoin||0)>=1 && (s.worlds.space.goldstar||0)>=1,
+  };
+  const achIcons = {
+    first_click:'👋', c100:'🖱️', c500:'🔥', c2000:'🌙', first_item:'📦', coll25:'🧺', coll100:'🏺',
+    first_rare:'🔮', first_epic:'👑', first_gold:'🌟', gold5:'✨', gold10:'👑',
+    unlock_ocean:'⛵', unlock_space:'🚀', first_upgrade:'🔧', all_upgrades:'💯', autopilot100:'🤖', triple_gold:'🏆'
+  };
+
+  const UPGRADE_DEFS = [
+    { id:'auto1', icon:'🐢', cost:50,  requires:null, mutuallyExcludesOwned:'auto1' },
+    { id:'auto2', icon:'🐇', cost:200, requires:'auto1' },
+    { id:'lucky1', icon:'🍀', cost:300, requires:null },
+    { id:'lucky2', icon:'🧲', cost:800, requires:'lucky1' },
   ];
 
+  /* ---------- DOM refs ---------- */
   const clickBtn=document.getElementById('clickBtn');
   const clickCountEl=document.getElementById('clickCount');
   const itemCountEl=document.getElementById('itemCount');
   const goldCountEl=document.getElementById('goldCount');
+  const coinAmountEl=document.getElementById('coinAmount');
   const feed=document.getElementById('feed');
   const flash=document.getElementById('flash');
   const banner=document.getElementById('goldBanner');
   const achToast=document.getElementById('achToast');
   const achToastText=document.getElementById('achToastText');
+  const achToastTitle=document.getElementById('achToastTitle');
 
   function popFeed(text, cls){
     const d=document.createElement('div');
@@ -360,101 +508,211 @@
     feed.innerHTML=''; feed.appendChild(d);
   }
   function goldMoment(){
+    banner.textContent = t().goldBanner;
     flash.classList.add('on'); banner.classList.add('show');
     setTimeout(()=>flash.classList.remove('on'),300);
     setTimeout(()=>banner.classList.remove('show'),1800);
   }
   let toastQueue=[], toastBusy=false;
-  function queueAch(a){
-    toastQueue.push(a);
-    if(!toastBusy) drainToast();
-  }
+  function queueAch(id){ toastQueue.push(id); if(!toastBusy) drainToast(); }
   function drainToast(){
     if(!toastQueue.length){ toastBusy=false; return; }
     toastBusy=true;
-    const a=toastQueue.shift();
-    achToastText.textContent = a.name + ' — ' + a.desc;
+    const id=toastQueue.shift();
+    const [name,desc] = t().ach[id];
+    achToastTitle.textContent = t().achToastTitle;
+    achToastText.textContent = ' ' + name + ' — ' + desc;
     achToast.classList.add('show');
     sndAch();
-    setTimeout(()=>{
-      achToast.classList.remove('show');
-      setTimeout(drainToast, 350);
-    }, 2200);
+    setTimeout(()=>{ achToast.classList.remove('show'); setTimeout(drainToast, 350); }, 2200);
+  }
+  function checkAchievements(){
+    achDefs.forEach(id=>{
+      if (!state.ach[id] && achChecks[id](state)){ state.ach[id]=true; queueAch(id); }
+    });
   }
 
-  function checkAchievements(){
-    achievements.forEach(a=>{
-      if (!state.ach[a.id] && a.check(state)){
-        state.ach[a.id]=true;
-        queueAch(a);
-      }
+  function worldUnlocked(id){ return state.items >= WORLDS[id].unlockAt; }
+
+  function renderWorldBar(){
+    const bar = document.getElementById('worldBar');
+    bar.innerHTML = WORLD_ORDER.map(id=>{
+      const w = WORLDS[id];
+      const unlocked = worldUnlocked(id);
+      const active = state.world===id;
+      return `<div class="world-tile ${active?'active':''} ${unlocked?'':'locked'}" data-world="${id}">
+        ${unlocked?'':'<span class="lockIco">🔒</span>'}
+        <span class="wicon">${w.icon}</span>
+        <div class="wname">${t().worldNames[id]}</div>
+        <div class="wsub">${unlocked ? '' : t().unlockAt(w.unlockAt)}</div>
+      </div>`;
+    }).join('');
+    bar.querySelectorAll('.world-tile').forEach(tile=>{
+      tile.addEventListener('click', ()=>{
+        const id = tile.getAttribute('data-world');
+        if (!worldUnlocked(id)) return;
+        state.world = id; save();
+        renderWorldBar(); renderStage(); renderInv();
+      });
     });
+  }
+
+  function renderStage(){
+    document.getElementById('stageWorldName').textContent = WORLDS[state.world].icon + ' ' + t().worldNames[state.world];
+    document.getElementById('txtOdds').innerHTML = t().odds.replace('{gold}', (CHANCE_MAP.gold+luckyBonus()).toFixed(2).replace('.', lang==='cz'?',':'.'));
   }
 
   function renderInv(){
     const grid=document.getElementById('invGrid');
-    grid.innerHTML = tiers.filter(t=>t.key!=='nothing').map(t=>{
-      const qty = state.inv[t.key]||0;
+    const w = WORLDS[state.world];
+    const order = ['a','b','c','d','e','f','g','h','gold'];
+    const inv = state.worlds[state.world] || {};
+    grid.innerHTML = order.map(slot=>{
+      const def = w.slots[slot];
+      const qty = inv[def.key]||0;
       const locked = qty===0;
-      return `<div class="inv-item ${locked?'locked':''} ${t.key==='gold'?'gold-item':''}">
-        <span class="icon">${locked?'❔':t.icon}</span>
-        <div class="name">${t.name}</div>
+      return `<div class="inv-item ${locked?'locked':''} ${slot==='gold'?'gold-item':''}">
+        <span class="icon">${locked?'❔':def.icon}</span>
+        <div class="name">${t().worldItems[state.world][def.key]}</div>
         <div class="qty">${qty}</div>
       </div>`;
     }).join('');
-    document.getElementById('invTotal').textContent = state.items + ' items';
+    document.getElementById('invTotal').textContent = t().invCount(state.items);
   }
 
   function renderAch(){
     const list=document.getElementById('achList');
-    list.innerHTML = achievements.map(a=>{
-      const unlocked = !!state.ach[a.id];
+    list.innerHTML = achDefs.map(id=>{
+      const unlocked = !!state.ach[id];
+      const [name,desc] = t().ach[id];
       return `<div class="ach-row ${unlocked?'unlocked':'locked'}">
-        <div class="ico">${unlocked?a.icon:'🔒'}</div>
-        <div>
-          <div class="name">${a.name}</div>
-          <div class="desc">${a.desc}</div>
-        </div>
+        <div class="ico">${unlocked?achIcons[id]:'🔒'}</div>
+        <div><div class="name">${name}</div><div class="desc">${desc}</div></div>
       </div>`;
     }).join('');
-    const unlockedCount = achievements.filter(a=>state.ach[a.id]).length;
-    document.getElementById('achTotal').textContent = unlockedCount+'/'+achievements.length;
+    const unlockedCount = achDefs.filter(id=>state.ach[id]).length;
+    document.getElementById('achTotal').textContent = unlockedCount+'/'+achDefs.length;
   }
 
+  function renderUpgrades(){
+    const list = document.getElementById('upgList');
+    list.innerHTML = UPGRADE_DEFS.map(u=>{
+      const owned = !!state.upg[u.id];
+      const lockedByReq = u.requires && !state.upg[u.requires];
+      const canAfford = state.coins >= u.cost;
+      const [name, desc] = t().upgrades[u.id];
+      const btnDisabled = owned || lockedByReq || !canAfford;
+      const btnLabel = owned ? t().owned : (t().buy + ' · 🪙' + u.cost);
+      return `<div class="upg-row ${owned?'owned':''}">
+        <div class="uico">${u.icon}</div>
+        <div class="uinfo"><div class="uname">${name}</div><div class="udesc">${desc}${lockedByReq?' 🔒':''}</div></div>
+        <button data-upg="${u.id}" ${btnDisabled?'disabled':''}>${btnLabel}</button>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('button[data-upg]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-upg');
+        buyUpgrade(id);
+      });
+    });
+  }
+
+  function buyUpgrade(id){
+    const def = UPGRADE_DEFS.find(u=>u.id===id);
+    if (!def || state.upg[id]) return;
+    if (def.requires && !state.upg[def.requires]) return;
+    if (state.coins < def.cost) return;
+    state.coins -= def.cost;
+    state.upg[id] = true;
+    sndBuy();
+    setupAutoClick();
+    renderCoins(); renderUpgrades();
+    checkAchievements(); renderAch();
+    save();
+  }
+
+  function renderCoins(){
+    coinAmountEl.textContent = state.coins.toLocaleString();
+  }
   function renderStats(){
     clickCountEl.textContent = state.clicks.toLocaleString();
     itemCountEl.textContent = state.items.toLocaleString();
     goldCountEl.textContent = state.golds.toLocaleString();
   }
 
-  clickBtn.addEventListener('click', () => {
+  function applyLanguage(){
+    const d = t();
+    document.getElementById('htmlRoot').lang = lang;
+    document.getElementById('txtTag').textContent = d.tag;
+    document.getElementById('txtTitle').textContent = d.title;
+    document.getElementById('txtSub').textContent = d.sub;
+    document.getElementById('txtCoinsLabel').textContent = d.coinsLabel;
+    document.getElementById('txtMusicTitle').textContent = d.musicTitle;
+    document.getElementById('musicToggle').textContent = playing ? d.pause : d.play;
+    document.getElementById('ytInput').placeholder = d.ytPlaceholder;
+    document.getElementById('ytLoad').textContent = d.ytLoad;
+    document.getElementById('txtClickLbl').textContent = d.clickLbl;
+    document.getElementById('txtClickSm').textContent = d.clickSm;
+    document.getElementById('txtStatClicks').textContent = d.statClicks;
+    document.getElementById('txtStatItems').textContent = d.statItems;
+    document.getElementById('txtStatGold').textContent = d.statGold;
+    document.getElementById('txtInvHeader').textContent = d.invHeader;
+    document.getElementById('txtAchHeader').textContent = d.achHeader;
+    document.getElementById('txtUpgHeader').textContent = d.upgHeader;
+    document.getElementById('txtFooter').textContent = d.footer;
+    document.getElementById('langEN').classList.toggle('active', lang==='en');
+    document.getElementById('langCZ').classList.toggle('active', lang==='cz');
+    renderWorldBar(); renderStage(); renderInv(); renderAch(); renderUpgrades(); renderCoins();
+  }
+
+  document.getElementById('langEN').addEventListener('click', ()=>{ lang='en'; try{localStorage.setItem('golden_click_lang',lang);}catch(e){} applyLanguage(); });
+  document.getElementById('langCZ').addEventListener('click', ()=>{ lang='cz'; try{localStorage.setItem('golden_click_lang',lang);}catch(e){} applyLanguage(); });
+
+  function doClick(auto){
     state.clicks++;
+    if (auto) state.autoClicks++;
     sndClick();
-    const tier = rollTier();
+    const tier = rollTier(state.world);
 
     if (tier.key!=='nothing'){
       state.items++;
-      state.inv[tier.key] = (state.inv[tier.key]||0)+1;
-      if (tier.key==='gold'){
+      state.worlds[state.world][tier.key] = (state.worlds[state.world][tier.key]||0)+1;
+      state.counts[tier.cls] = (state.counts[tier.cls]||0)+1;
+      const coinsEarned = COIN_VALUE[tier.cls]||0;
+      state.coins += coinsEarned; state.totalCoins += coinsEarned;
+      if (tier.cls==='t-gold'){
         state.golds++;
-        popFeed('★ GOLDEN CLICK — added to inventory ★', tier.cls);
+        popFeed(t().goldMsg, tier.cls);
         goldMoment();
       } else {
-        popFeed('found: '+tier.name, tier.cls);
+        popFeed(t().foundPrefix + t().worldItems[state.world][tier.key], tier.cls);
       }
-      setTimeout(tier.snd, 0);
+      setTimeout(({'t-common':sndCommon,'t-uncommon':sndUncommon,'t-rare':sndRare,'t-epic':sndEpic,'t-gold':sndGold})[tier.cls], 0);
     } else {
-      popFeed('nothing this time…', tier.cls);
-      setTimeout(tier.snd, 0);
+      popFeed(t().nothingMsg, tier.cls);
+      setTimeout(sndNothing, 0);
     }
 
-    renderStats(); renderInv();
+    renderStats(); renderCoins(); renderInv(); renderWorldBar(); renderUpgrades();
     checkAchievements(); renderAch();
     save();
-  });
+  }
 
-  renderStats(); renderInv(); renderAch();
+  clickBtn.addEventListener('click', ()=> doClick(false));
 
+  /* ---------- auto-clicker ---------- */
+  let autoTimer = null;
+  function setupAutoClick(){
+    if (autoTimer){ clearInterval(autoTimer); autoTimer = null; }
+    let interval = null;
+    if (state.upg.auto2) interval = 2000;
+    else if (state.upg.auto1) interval = 5000;
+    if (interval){
+      autoTimer = setInterval(()=> doClick(true), interval);
+    }
+  }
+
+  /* ---------- youtube player ---------- */
   const stationSelect=document.getElementById('stationSelect');
   const musicToggle=document.getElementById('musicToggle');
   const playerBox=document.getElementById('playerBox');
@@ -477,27 +735,20 @@
     playerBox.style.display='block';
   }
   musicToggle.addEventListener('click', ()=>{
-    if (!playing){
-      loadVideo(stationSelect.value, true);
-      musicToggle.textContent='⏸ playing';
-      playing=true;
-    } else {
-      playerBox.style.display='none';
-      ytPlayer.innerHTML='';
-      musicToggle.textContent='▶ play';
-      playing=false;
-    }
+    if (!playing){ loadVideo(stationSelect.value, true); playing=true; }
+    else { playerBox.style.display='none'; ytPlayer.innerHTML=''; playing=false; }
+    musicToggle.textContent = playing ? t().pause : t().play;
   });
-  stationSelect.addEventListener('change', ()=>{
-    if (playing) loadVideo(stationSelect.value, true);
-  });
+  stationSelect.addEventListener('change', ()=>{ if (playing) loadVideo(stationSelect.value, true); });
   ytLoad.addEventListener('click', ()=>{
     const id = extractId(ytInput.value);
-    if (!id){ ytInput.placeholder="hmm, couldn't read that link — try again"; return; }
-    loadVideo(id, true);
-    musicToggle.textContent='⏸ playing';
-    playing=true;
+    if (!id){ ytInput.placeholder = t().ytError; return; }
+    loadVideo(id, true); playing=true; musicToggle.textContent = t().pause;
   });
+
+  renderStats();
+  applyLanguage();
+  setupAutoClick();
 })();
 </script>
 
